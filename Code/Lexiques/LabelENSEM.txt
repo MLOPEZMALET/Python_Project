@@ -1,0 +1,7 @@
+B-Person
+B-Location
+B-Organization
+B-Company
+B-POI
+B-FictionCharacter
+B-Product

@@ -1,0 +1,12 @@
+suj
+obj
+de_obj
+a_obj
+p_obj
+ats
+ato
+mod
+aux_tps
+aux_pass
+aux_caus
+aff

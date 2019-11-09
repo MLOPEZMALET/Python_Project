@@ -1,0 +1,7 @@
+B-AP
+B-AdP
+B-NP
+B-VN
+B-CONJ
+B-UNKNOWN
+B-PP
