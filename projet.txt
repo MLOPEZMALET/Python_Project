@@ -1,0 +1,60 @@
+projet python
+
+le fichier doit etre tree-taggé
+réécriture d'un fichier en tsv
+avec le tsv analyse lexicale+verifie pos (sentiment analysis) --> liste + vectorization
+modification de la matrice avec conditions (negations, emoticones, certains mots, ponctuation...)
+matrice comme feature algo classification
+
+
+--> pas que tree tagger
+--> vectorization sans tfidf (word2vec)
+--> createur de features (intents? polarité? thematique? -> laisser une ouverture au user sur ce dont il a besoin en fonction du corpus)
+--> enrichissement des conditions
+--> API (flask? pyqt?)
+-->algos?
+
+______________________________________________________________________________________________________________________________________________
+
+REMARQUES
+
+Besoin d'écrire clairement ce que fait le script avec quoi. Ordre des étapes.
+On garde tout pour le projet? ou on établit une pipeline déterminée? plus pauvre mais plus ouverte à divers formats?
+si on fait word2vec, càd entrainement d'un modèle avec le corpus donné? dans quel but? construire un lexique?
+
+polarité OU theme 
+(OU intent: RASA intent classifiers https://medium.com/bhavaniravi/intent-classification-demystifying-rasanlu-part-4-685fc02f5c1d, 
+ou https://towardsdatascience.com/multi-label-intent-classification-1cdd4859b93)
+
+
+_______________________________________________________________________________________________________________________________________________
+
+QUESTIONS SUR LE CODE
+
+___Codes
+
+rescrotal?
+tsv != conll? (que doit contenir le conllu exactement?)
+5 scripts de vectorisation: redondances? actualisations? chacun a une fonction?
+seg to vec?
+fusion annotation segment?
+dictionary = vocabulaire du corpus? nbres = comptage?
+
+___Construction corpus tabulaire
+
+appartenance lexique x3
+SEM? (logiciel?)
+ajout de trois logiciels de POS-tagging?
+aussi scripts de vectorisation. Pourquoi autant?
+div1...8?
+
+___Lexiques
+
+les lexiques créés par toi ou proposés par le stage?
+diff entre lexique et dump lexique
+
+___TF-IDF
+
+viz clustering? qu'est-ce qu'elle représente?
+corpus tripadvisor étiqueté? 
+
