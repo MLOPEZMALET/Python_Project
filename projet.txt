@@ -11,7 +11,9 @@ matrice comme feature algo classification
 --> vectorization sans tfidf (word2vec)
 --> createur de features (intents? polarité? thematique? -> laisser une ouverture au user sur ce dont il a besoin en fonction du corpus)
 --> enrichissement des conditions
---> API (flask? pyqt?)
+--> API:
+	-web app flask: py + template html + css
+	-pyqt: 
 -->algos?
 
 ______________________________________________________________________________________________________________________________________________
