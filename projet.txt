@@ -1,20 +1,43 @@
-projet python
-
-le fichier doit etre tree-taggé
-réécriture d'un fichier en tsv
-avec le tsv analyse lexicale+verifie pos (sentiment analysis) --> liste + vectorization
-modification de la matrice avec conditions (negations, emoticones, certains mots, ponctuation...)
-matrice comme feature algo classification
+TOOLKIT PROJET PYTHON 
 
 
---> pas que tree tagger
---> vectorization sans tfidf (word2vec)
---> createur de features (intents? polarité? thematique? -> laisser une ouverture au user sur ce dont il a besoin en fonction du corpus)
---> enrichissement des conditions
---> API:
-	-web app flask: py + template html + css
-	-pyqt: 
--->algos?
+qué corpus?
+literario -> estilistica? (patterns, polaridad, puntuacion, vocabulario mas comun, palabras especificas (loi hypergeometrique, lafon), tf idf...)
+periodistico -> si periodistico, analisis tematico y polaridad
+
+
+INPUT: 
+tree tagger
+
+Otros logiciels;  web theatre classique (pb sur les stats, pas de saillance donc rien intéressant), TXM
+
+LITERARIO: amplitud del vocabulario log(numero palabras distintas)/log(numero total de palabras), funcionalidad para comparar textos? dos inputs?, estadisticas sobre el contexto de una palabra en el corpus (con una ventana a definir, como en lexico pero haciendo ya las estadisticas), crear sous corpus para mejorar las estadisticas, segments répétés (expresiones recurrentes) O patrones sintaxicos recurrentes.
+
+campo: sparador entre documentos que dice el utilizador para segmentar en documentos.
+estadisticas morfologia sobre taggings
+lexicos: polaridad, tematicos?
+matriz tfidf, TF, (cosine? semantic similarity?)
+lemmes mas corrientes? <-> lexicos
+frequency
+ajustar croissant/décroissant
+indice de spécificité
+patterns mas frecuentes morfologicos
+negaciones, puntuacion?
+preguntar si contar stopwords: cuando se utilizan y cuando no? -->parametro recurrente o no?
+VIZ
+
+INTERFACE:
+flask?
+
+TODOLIST
+
+2) constituir corpus
+3) tree tagging
+1) buscar lexicos que puedan ser utiles en francés
+
+concatenar archivos entre ellos
+vectorisation: TF-IDF, TF
+indice de spécificité
 
 ______________________________________________________________________________________________________________________________________________
 
@@ -28,7 +51,38 @@ polarité OU theme
 (OU intent: RASA intent classifiers https://medium.com/bhavaniravi/intent-classification-demystifying-rasanlu-part-4-685fc02f5c1d, 
 ou https://towardsdatascience.com/multi-label-intent-classification-1cdd4859b93)
 
+prendre en compte l'arborescence de l'utilisateur
+__________________________________________________________________________________________________________________________________________
 
+qué corpus?
+literario, periodistico, redes sociales
+
+INPUT: 
+tree tagger
+
+FUNCIONALIDADES:
+estadisticas morfologia sobre taggings
+lexicos: polaridad, tematicos?
+matriz tfidf, TF
+lemmes mas corrientes? <-> lexicos
+frequency
+ajustar croissant/décroissant
+indice de spécificité
+patterns mas frecuentes morfologicos
+negaciones, puntuacion?
+VIZ
+
+INTERFACE:
+flask?
+
+TODOLIST
+
+constituir corpus
+tree tagging
+
+concatenar archivos entre ellos
+vectorisation: TF-IDF, TF
+indice de spécificité
 _______________________________________________________________________________________________________________________________________________
 
 QUESTIONS SUR LE CODE
@@ -36,27 +90,27 @@ QUESTIONS SUR LE CODE
 ___Codes
 
 rescrotal?
-tsv != conll? (que doit contenir le conllu exactement?)
-5 scripts de vectorisation: redondances? actualisations? chacun a une fonction?
-seg to vec?
-fusion annotation segment?
+tsv != conll? (que doit contenir le conllu exactement?) 
+5 scripts de vectorisation: redondances? actualisations? chacun a une fonction? --> dernier fichier est le plus actualisé et le plus pertinents
+seg to vec? --> documento del corpus = segment
+fusion annotation segment? corpus annoté
 dictionary = vocabulaire du corpus? nbres = comptage?
 
 ___Construction corpus tabulaire
 
 appartenance lexique x3
-SEM? (logiciel?)
-ajout de trois logiciels de POS-tagging?
+SEM? (logiciel?) --> benchmarking de tous. tree tagger spoken french = le meilleur
 aussi scripts de vectorisation. Pourquoi autant?
-div1...8?
+div1...8? --> divisiones del corpus en varias partes
 
 ___Lexiques
 
 les lexiques créés par toi ou proposés par le stage?
-diff entre lexique et dump lexique
+diff entre lexique et dump lexique (dump pas important)
+creerlexique.py cree un lexique
 
 ___TF-IDF
 
-viz clustering? qu'est-ce qu'elle représente?
-corpus tripadvisor étiqueté? 
+se calcula con una libreria
+viz clustering? qu'est-ce qu'elle représente? --> apres unsupervised
 
