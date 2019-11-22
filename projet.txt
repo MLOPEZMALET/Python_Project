@@ -1,0 +1,116 @@
+TOOLKIT PROJET PYTHON 
+
+
+qué corpus?
+literario -> estilistica? (patterns, polaridad, puntuacion, vocabulario mas comun, palabras especificas (loi hypergeometrique, lafon), tf idf...)
+periodistico -> si periodistico, analisis tematico y polaridad
+
+
+INPUT: 
+tree tagger
+
+Otros logiciels;  web theatre classique (pb sur les stats, pas de saillance donc rien intéressant), TXM
+
+LITERARIO: amplitud del vocabulario log(numero palabras distintas)/log(numero total de palabras), funcionalidad para comparar textos? dos inputs?, estadisticas sobre el contexto de una palabra en el corpus (con una ventana a definir, como en lexico pero haciendo ya las estadisticas), crear sous corpus para mejorar las estadisticas, segments répétés (expresiones recurrentes) O patrones sintaxicos recurrentes.
+
+campo: sparador entre documentos que dice el utilizador para segmentar en documentos.
+estadisticas morfologia sobre taggings
+lexicos: polaridad, tematicos?
+matriz tfidf, TF, (cosine? semantic similarity?)
+lemmes mas corrientes? <-> lexicos
+frequency
+ajustar croissant/décroissant
+indice de spécificité
+patterns mas frecuentes morfologicos
+negaciones, puntuacion?
+preguntar si contar stopwords: cuando se utilizan y cuando no? -->parametro recurrente o no?
+VIZ
+
+INTERFACE:
+flask?
+
+TODOLIST
+
+2) constituir corpus
+3) tree tagging
+1) buscar lexicos que puedan ser utiles en francés
+
+concatenar archivos entre ellos
+vectorisation: TF-IDF, TF
+indice de spécificité
+
+______________________________________________________________________________________________________________________________________________
+
+REMARQUES
+
+Besoin d'écrire clairement ce que fait le script avec quoi. Ordre des étapes.
+On garde tout pour le projet? ou on établit une pipeline déterminée? plus pauvre mais plus ouverte à divers formats?
+si on fait word2vec, càd entrainement d'un modèle avec le corpus donné? dans quel but? construire un lexique?
+
+polarité OU theme 
+(OU intent: RASA intent classifiers https://medium.com/bhavaniravi/intent-classification-demystifying-rasanlu-part-4-685fc02f5c1d, 
+ou https://towardsdatascience.com/multi-label-intent-classification-1cdd4859b93)
+
+prendre en compte l'arborescence de l'utilisateur
+__________________________________________________________________________________________________________________________________________
+
+qué corpus?
+literario, periodistico, redes sociales
+
+INPUT: 
+tree tagger
+
+FUNCIONALIDADES:
+estadisticas morfologia sobre taggings
+lexicos: polaridad, tematicos?
+matriz tfidf, TF
+lemmes mas corrientes? <-> lexicos
+frequency
+ajustar croissant/décroissant
+indice de spécificité
+patterns mas frecuentes morfologicos
+negaciones, puntuacion?
+VIZ
+
+INTERFACE:
+flask?
+
+TODOLIST
+
+constituir corpus
+tree tagging
+
+concatenar archivos entre ellos
+vectorisation: TF-IDF, TF
+indice de spécificité
+_______________________________________________________________________________________________________________________________________________
+
+QUESTIONS SUR LE CODE
+
+___Codes
+
+rescrotal?
+tsv != conll? (que doit contenir le conllu exactement?) 
+5 scripts de vectorisation: redondances? actualisations? chacun a une fonction? --> dernier fichier est le plus actualisé et le plus pertinents
+seg to vec? --> documento del corpus = segment
+fusion annotation segment? corpus annoté
+dictionary = vocabulaire du corpus? nbres = comptage?
+
+___Construction corpus tabulaire
+
+appartenance lexique x3
+SEM? (logiciel?) --> benchmarking de tous. tree tagger spoken french = le meilleur
+aussi scripts de vectorisation. Pourquoi autant?
+div1...8? --> divisiones del corpus en varias partes
+
+___Lexiques
+
+les lexiques créés par toi ou proposés par le stage?
+diff entre lexique et dump lexique (dump pas important)
+creerlexique.py cree un lexique
+
+___TF-IDF
+
+se calcula con una libreria
+viz clustering? qu'est-ce qu'elle représente? --> apres unsupervised
+
