@@ -143,3 +143,10 @@ def longuermots(doc):
                 print(e[0],'mot de ',e[1],'lettres')
             else:
                 print(e[0],'mots de ',e[1],'lettres')
+def contexte(text,dic3):
+    w=input('context du quel mot? ')
+    fenetre=int(input('combien de mots avant et après? '))
+    if w in text:
+        for e in range(len(dic3)):
+            if dic3[e]==w:
+                print((' '.join(dic3[(e-(fenetre)):e])),(' '.join(dic3[e:(e+(fenetre)+1)])))
