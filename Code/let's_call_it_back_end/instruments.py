@@ -1,3 +1,14 @@
+import re
+import spacy
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import sys
+import operator
+import argparse
+import collections
+import plotly.graph_objects as go
+import clustering
+import plottingvso2
 def tokenizer(text):
     new = re.sub(r'[^\w\s]','',text)
     liste=  new.split()
@@ -7,12 +18,18 @@ def frequency(liste):
     liste_of_frequence= [liste.count(w) for w in liste]
 #les valeurs seront les nombres d'occurences dans le deuxieme liste(liste_of_frequence)
     dictionary = dict(zip(liste,liste_of_frequence))
-#print("in form of a dictionary:")
-#print(dictionary)
+    r=input('show wordcloud? ')
+    if r=='yes':
+        wordcl(dictionary)
+    r=input('show graph? ')
+    if r=='yes':
+        freqplot(dictionary)
+     
+    #print("in form of a dictionary:")
 #dans une celule de liste insertons clés et valeur pour chaque clés et valeur de diccionaire (methode .items() permet acceder en même temps aux clés et valeurs)
     list_key_value = [ [k,v] for v, k in dictionary.items() ]
 #print("in form of a list:")
-#print(list_key_value)
+    #print(list_key_value)
     r=input('par ordre croissant?yes/no ')
     if r=='yes':
         for w in sorted(dictionary, key=dictionary.get, reverse=False):
@@ -22,6 +39,7 @@ def frequency(liste):
             print (w, dictionary[w])
     else:
         print('bad answer')
+    
 #juste le methode sorted. en fait on peut comme ici n'indiquer pas reverse quand on a beaoin d;ordre decroissant parce que il est par defaut
     list_croissant= sorted(list_key_value)
     #print (list_croissant)
@@ -53,6 +71,12 @@ def posstats(doc):
     list_key_value = [ [k,v] for v, k in dictionary.items() ]
     #print("in form of a list:")
     #print(list_key_value)
+    r=input('show wordcloud? ')
+    if r=='yes':
+        wordcl(dictionary)
+    r=input('show graph? ')
+    if r=='yes':
+        freqplot(dictionary)
     for w in sorted(dictionary, key=dictionary.get, reverse=True):
         print (w, dictionary[w])
 def specificity(text):
@@ -104,8 +128,9 @@ def patterngiver(doc):
                     print (t[e],"-",t[e+1],"-",t[e+2],"-",t[e+3])
                     print(t[e][0],t[e+1][0],t[e+2][0],t[e+3][0])
         
-        print(len(l1+l2+l3+l4))
+        print("quantité de matches",len(l1+l2+l3+l4))
 def phrasesnominales(dic):
+    nlp = spacy.load('fr_core_news_sm')
     l1=[]
     l2=[]
     for e in dic:
@@ -114,7 +139,7 @@ def phrasesnominales(dic):
         l2.append([word.text for word in doc])
     for e in range (len(l1)):
         if 'VERB' not in l1[e]:
-            print(l2[e]) 
+            print(' '.join(l2[e])) 
 def longuermots(doc):
     l1=[]
     l2=[]
@@ -138,15 +163,115 @@ def longuermots(doc):
         for e in sorted(l3):
             if e not in l4:
                 l4.append(e)
-        for e in l4:
-            if e[0]==1:
-                print(e[0],'mot de ',e[1],'lettres')
-            else:
-                print(e[0],'mots de ',e[1],'lettres')
+        l5=dict(l4)
+        r=input('show graph? ')
+        if r=='yes':
+            freqplot(l5)
+        r=input('show as a table? ')
+        if r=='yes':
+            l6=[]
+            l7=[]
+            for e in l4:
+                if e[0]==1:
+                    l6.append(e[0])
+                    l7.append(e[1])
+                    #print(e[0],'mot de ',e[1],'lettres')
+                else:
+                    #print(e[0],'mots de ',e[1],'lettres')
+                    l6.append(e[0])
+                    l7.append(e[1])
+            import plotly.graph_objects as go
+            fig = go.Figure(data=[go.Table(header=dict(values=['Quanité', 'Longuer du mot']),
+                 cells=dict(values=[l6,l7]))
+                     ])
+            fig.show()
 def contexte(text,dic3):
+    import plotly.graph_objects as go
     w=input('context du quel mot? ')
     fenetre=int(input('combien de mots avant et après? '))
+    liste1=[]
+    liste2=[]
+    liste3=[]
     if w in text:
         for e in range(len(dic3)):
             if dic3[e]==w:
                 print((' '.join(dic3[(e-(fenetre)):e])),(' '.join(dic3[e:(e+(fenetre)+1)])))
+                liste1.append(' '.join(dic3[(e-(fenetre)):e]))
+                liste2.append(' '.join(dic3[e+1:(e+(fenetre)+1)]))
+                liste3.append(dic3[e])
+    import plotly.graph_objects as go
+    fig = go.Figure(data=[go.Table(header=dict(values=['Avant', 'mot','après']),
+                 cells=dict(values=[liste1,liste3,liste2]))
+                     ])
+    fig.show()
+
+def wordcl(word_freq):
+    text = " ".join([(k + " ")*v for k,v in word_freq.items()])
+
+    # Generate a word cloud image
+    wordcloud = WordCloud().generate(text)
+
+
+    # Display the generated image:
+    # the matplotlib way:
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+
+    # lower max_font_size
+    wordcloud = WordCloud(max_font_size=40).generate(text)
+    plt.figure()
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+# The pil way (if you don't have matplotlib)
+# image = wordcloud.to_image()
+# image.show()
+def freqplot(dictionary):
+    # printing most common words
+    # the next line sorts the default dict on the values in decreasing  # order and prints the first "to_print".
+    to_print = int(input("How many top words do you wish to print?"))
+    mc = sorted(dictionary.items(), key=lambda k_v: k_v[1], reverse=True)[:to_print]
+    # Draw the bart chart
+    mc = dict(mc)
+    names = list(mc.keys())
+    values = list(mc.values())
+    plt.bar(range(len(mc)),values,tick_label=names)
+    plt.savefig('bar.png')
+    plt.show()
+def tfidfer(sentences):
+    analyzer = clustering.Clustering(stopwords=False, tfidf=True, stemming=True, nbclusters=5, algo="spectral", dist="manhattan")
+    dtm, vocab = analyzer.preprocess(sentences)
+    
+    print(len(vocab))
+    print(vocab)
+    print ('ETAPE 2 - tf-idf')
+    listeTF=[]
+
+    for vecteur in dtm:
+        res=''
+        for chaine in vecteur:  
+            res += str(chaine)+' '
+        listeTF.append(res)
+    print ('count sentences :'+str(len(sentences))+' count listeTF :'+str(len(listeTF)))
+    print ('ETAPE 3- écriture du fichier')
+    fic_out_vect=open("fichier_tf_idf.txt", 'w')
+    f=open("vocab.txt",'w')
+    nb_sentences =len(sentences)
+    for i in  range(nb_sentences):
+        fic_out_vect.write(listeTF[i]+'\n')
+    dic=[]
+    for i in dtm:
+        for i in dtm:
+            for e in i:
+                for w in vocab:
+                    if w not in dic:
+                        dic.append(w)
+                        dic.append(str(e))
+    for e in dic:
+        f.write(e)
+        f.write('\n')
+    import pandas as pd
+    import numpy as np
+    df = pd.DataFrame(dtm, columns = vocab)
+    f.close()
