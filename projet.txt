@@ -13,6 +13,8 @@ Otros logiciels;  web theatre classique (pb sur les stats, pas de saillance donc
 
 LITERARIO: amplitud del vocabulario log(numero palabras distintas)/log(numero total de palabras), funcionalidad para comparar textos? dos inputs?, estadisticas sobre el contexto de una palabra en el corpus (con una ventana a definir, como en lexico pero haciendo ya las estadisticas), crear sous corpus para mejorar las estadisticas, segments répétés (expresiones recurrentes) O patrones sintaxicos recurrentes.
 
+SUGERENCIA DEL PROFE: hacer algo adaptable segun el proyecto, no un bloque de cosas. Que se pueda elegir lo que se quiere hacer. (y si ponemos una cajita de sugestiones?) El recomienda que se puedan utilizar las regex para hacer requêtes personnalisées. 
+
 campo: sparador entre documentos que dice el utilizador para segmentar en documentos.
 estadisticas morfologia sobre taggings
 lexicos: polaridad, tematicos?
