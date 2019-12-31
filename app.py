@@ -43,6 +43,7 @@ def stats():
 def count_freq(text):
     pass
 
+# COMPOSANTES DE L'APPLICATION_________________________________________________
 
 app.layout = html.Div(
     id="alignment-body",
@@ -69,8 +70,15 @@ app.layout = html.Div(
                                             html.H4(
                                                 className="what-is",
                                                 children="Qu'est-ce qu'un analyseur de texte?",
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "60px",
+                                                    "textAlign": "center",
+                                                    "margin": "10px",
+                                                },
                                             ),
-                                            html.P("bliblabla"),
+                                            html.P("L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus. Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion. C'est très simple:"),
+                                            html.P("Comment faire? C'est très simple:vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus dans l'onglet Data. Voilà tout!")
                                         ],
                                     ),
                                 ),
@@ -83,9 +91,26 @@ app.layout = html.Div(
                                             html.H4(
                                                 className="config",
                                                 children="De quoi avez-vous besoin?",
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "60px",
+                                                    "lineHeight": "60px",
+                                                    "textAlign": "center",
+                                                    "margin": "10px",
+                                                },
                                             ),
                                             html.P("bliblabla"),
-                                            html.Label("Checkboxes"),
+                                            html.Label(
+                                                className="config",
+                                                children="Checkboxes1",
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "60px",
+                                                    "lineHeight": "60px",
+                                                    "textAlign": "left",
+                                                    "margin": "10px"
+                                                    }
+                                                ),
                                             dcc.Checklist(
                                                 options=[
                                                     {
@@ -101,7 +126,72 @@ app.layout = html.Div(
                                                         "value": "SF",
                                                     },
                                                 ],
-                                                value=["MTL", "SF"],
+                                                value=["NYC", "MTL", "SF"],
+                                                style={
+                                                    "textAlign": "left",
+                                                },
+                                            ),
+                                            html.Label(
+                                                className="config",
+                                                children="Checkboxes2",
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "60px",
+                                                    "lineHeight": "60px",
+                                                    "textAlign": "center",
+                                                    "margin": "10px"
+                                                    }
+                                                ),
+                                            dcc.Checklist(
+                                                options=[
+                                                    {
+                                                        "label": "New York City",
+                                                        "value": "NYC",
+                                                    },
+                                                    {
+                                                        "label": u"Montréal",
+                                                        "value": "MTL",
+                                                    },
+                                                    {
+                                                        "label": "San Francisco",
+                                                        "value": "SF",
+                                                    },
+                                                ],
+                                                value=["NYC", "MTL", "SF"],
+                                                style={
+                                                    "textAlign": "center",
+                                                },
+                                            ),
+                                            html.Label(
+                                                className="config",
+                                                children="Checkboxes3",
+                                                style={
+                                                    "width": "100%",
+                                                    "height": "60px",
+                                                    "lineHeight": "60px",
+                                                    "textAlign": "right",
+                                                    "margin": "15px"
+                                                    }
+                                                ),
+                                            dcc.Checklist(
+                                                options=[
+                                                    {
+                                                        "label": "New York City",
+                                                        "value": "NYC",
+                                                    },
+                                                    {
+                                                        "label": u"Montréal",
+                                                        "value": "MTL",
+                                                    },
+                                                    {
+                                                        "label": "San Francisco",
+                                                        "value": "SF",
+                                                    },
+                                                ],
+                                                value=["NYC", "MTL", "SF"],
+                                                style={
+                                                    "textAlign": "right"
+                                                },
                                             ),
                                         ],
                                     ),
@@ -260,6 +350,7 @@ app.layout = html.Div(
     ],
     style={'columnCount':1})
 
+# DYNAMISME DE L'APPLICATION_________________________________________________
 
 @app.callback(
     Output("output-data-upload", "children"),
