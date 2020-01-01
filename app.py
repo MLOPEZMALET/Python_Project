@@ -77,8 +77,8 @@ def generate_table(contents, filename):
     )
 
 
-
 # COMPOSANTES DE L'APPLICATION_________________________________________________
+
 
 app.layout = html.Div(
     id="alignment-body",
@@ -105,7 +105,9 @@ app.layout = html.Div(
         html.Div(
             style={
                 'backgroundColor': colors["background"],
-                'columnCount': 1},
+                'columnCount': 1,
+                "margin-bottom": "50px",
+                },
             children=[
                 html.Div(
                     id="alignment-control-tabs",
@@ -151,12 +153,12 @@ app.layout = html.Div(
                                                     "width": "100%",
                                                     "height": "60px",
                                                     "textAlign": "center",
-                                                    "margin": "10px",
-                                                    "tabsBackgroundColor": colors["tabsBackground"]
+                                                    "margin": "10px"
                                                 },
                                             ),
                                             html.P("L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus. Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion."),
-                                            html.P("Comment faire? C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus (en format .txt) dans l'onglet Data. Voilà tout!")
+                                            html.P("Comment faire? C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus (en format .txt) dans l'onglet Data."),
+                                            html.P("Voilà tout!"),
                                         ],
                                     ),
                                 ),
@@ -184,7 +186,7 @@ app.layout = html.Div(
                                                     "width": "100%",
                                                     "height": "30px",
                                                     "lineHeight": "30px",
-                                                    "textAlign": "left",
+                                                    "textAlign": "center",
                                                     "margin": "10px"
                                                     }
                                                 ),
@@ -217,7 +219,7 @@ app.layout = html.Div(
                                                 ],
                                                 value=["FREQ", "FREQSTOP", "STX", "VOC", "PONCT" "SENT"],
                                                 style={
-                                                    "textAlign": "left",
+                                                    "textAlign": "center",
                                                 },
                                             ),
                                         ],
@@ -269,8 +271,14 @@ app.layout = html.Div(
                 ),
             ]
         ),
-        html.Div(id="output-data-upload"),
-        html.Div(id="output-data-upload2")
+        html.Div(
+            id="outputs",
+            children=[
+                html.Div(id="output-apercu"),
+                html.Div(id="output-tableau-freq")
+                ]
+            )
+
     ],
 )
 
@@ -278,7 +286,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("output-data-upload", "children"),
+    Output("output-apercu", "children"),
     [Input("upload-data", "contents")],
     [State("upload-data", "filename")],
 )
@@ -291,7 +299,7 @@ def update_output(list_of_contents, list_of_names):
 
 
 @app.callback(
-    Output("output-data-upload2", "children"),
+    Output("output-tableau-freq", "children"),
     [Input("upload-data", "contents")],
     [State("upload-data", "filename")],
 )
