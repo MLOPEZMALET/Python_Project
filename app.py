@@ -8,23 +8,35 @@ import pandas as pd
 from dash.dependencies import Input, Output, State
 import base64
 import io
+import re
+import operator
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 # df = pd.read_fwf("vero.txt", sep="\t")
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+# STYLE_____________________________________________
+
+colors = {
+    "background": "#F5F5DC",
+    "tabsBackground": "#FFFFFF",
+    "text": "#191970"
+}
+
+# FONCTIONS SUR LE CONTENU_____________________________________________________
+
 
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(",")
-
     decoded = base64.b64decode(content_string)
     # text = io.StringIO(decoded.decode('utf-8'))
     text = decoded.decode("utf-8")
     return html.Div(
         [
-            html.H4("Aperçu du texte contenu dans: " + filename),
-            html.H6(text[:300]),
-            html.Hr(),  # horizontal line
+            html.H6("Aperçu du texte contenu dans: " + filename),
+            html.H6(text[:300])
+
+            # horizontal line
             # For debugging, display the raw contents provided by the web browser
             # html.Div('Raw Content'),
             # html.Pre(contents[0:200] + '...', style={
@@ -34,38 +46,103 @@ def parse_contents(contents, filename):
         ]
     )
 
+def tokenizer(contents):
+    content_type, content_string = contents.split(",")
+    decoded = base64.b64decode(content_string)
+    text = decoded.decode("utf-8")
+    new = re.sub(r'[^\w\s]', '', text)
+    liste = new.split()
+    return liste
 
-def stats():
-    phrases = len(list(text.split("\n")))
-    return phrases
+
+def count_freq(liste):
+    liste_of_frequence = [liste.count(w) for w in liste]
+    dictionary = dict(zip(liste, liste_of_frequence))
+    sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
+    return sorted_dict
 
 
-def count_freq(text):
-    pass
+def generate_table(contents, filename):
+    mots = tokenizer(contents)
+    dict_freq = count_freq(mots)
+    df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in df_freq.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
+        ]) for i in range(min(len(df_freq), 10))]
+    )
+
+
 
 # COMPOSANTES DE L'APPLICATION_________________________________________________
 
 app.layout = html.Div(
     id="alignment-body",
     className="app-body",
+    style={
+        'backgroundColor': colors["background"],
+        'columnCount': 1
+        },
     children=[
-        html.H1(children="Analyseur de texte"),
-        html.Div(children="""Une interface pour une première analyse de corpus"""),
+        html.H1(
+            children="Analyseur de texte",
+            style={
+                "textAlign": "center",
+                "color": colors["text"]
+                }
+            ),
         html.Div(
-            [
+            children="""Une interface pour une première analyse de corpus""",
+            style={
+                "textAlign": "center",
+                "color": colors["text"]
+                },
+            ),
+        html.Div(
+            style={
+                'backgroundColor': colors["background"],
+                'columnCount': 1},
+            children=[
                 html.Div(
                     id="alignment-control-tabs",
                     className="control-tabs",
+                    style={
+                        "width": "100%",
+                        "height": "100px",
+                        "lineHeight": "20px",
+                        "textAlign": "center",
+                        "margin": "10px",
+                        "padding": "10px"
+                    },
                     children=[
                         dcc.Tabs(
                             id="alignment-tabs",
                             value="what-is",
+                            style={
+                                "width": "100%",
+                                "height": "60px",
+                                "lineHeight": "20px",
+                                "textAlign": "center",
+                                "margin": "10px",
+                                "color": colors["text"]
+                            },
                             children=[
                                 dcc.Tab(
                                     label="Explication",
                                     value="what-is",
                                     children=html.Div(
                                         className="control-tab",
+                                        style={
+                                            "width": "100%",
+                                            "height": "60px",
+                                            "lineHeight": "20px",
+                                            "textAlign": "center",
+                                            "margin": "10px",
+                                        },
                                         children=[
                                             html.H4(
                                                 className="what-is",
@@ -75,10 +152,11 @@ app.layout = html.Div(
                                                     "height": "60px",
                                                     "textAlign": "center",
                                                     "margin": "10px",
+                                                    "tabsBackgroundColor": colors["tabsBackground"]
                                                 },
                                             ),
-                                            html.P("L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus. Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion. C'est très simple:"),
-                                            html.P("Comment faire? C'est très simple:vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus dans l'onglet Data. Voilà tout!")
+                                            html.P("L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus. Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion."),
+                                            html.P("Comment faire? C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus (en format .txt) dans l'onglet Data. Voilà tout!")
                                         ],
                                     ),
                                 ),
@@ -99,14 +177,13 @@ app.layout = html.Div(
                                                     "margin": "10px",
                                                 },
                                             ),
-                                            html.P("bliblabla"),
                                             html.Label(
                                                 className="config",
-                                                children="Checkboxes1",
+                                                children="Sélectionnez les informations souhaitées",
                                                 style={
                                                     "width": "100%",
-                                                    "height": "60px",
-                                                    "lineHeight": "60px",
+                                                    "height": "30px",
+                                                    "lineHeight": "30px",
                                                     "textAlign": "left",
                                                     "margin": "10px"
                                                     }
@@ -114,83 +191,33 @@ app.layout = html.Div(
                                             dcc.Checklist(
                                                 options=[
                                                     {
-                                                        "label": "New York City",
-                                                        "value": "NYC",
+                                                        "label": "Mots les plus fréquents (sans mots grammaticaux)",
+                                                        "value": "FREQ",
                                                     },
                                                     {
-                                                        "label": u"Montréal",
-                                                        "value": "MTL",
+                                                        "label": "Mots les plus fréquents (parmi tous)",
+                                                        "value": "FREQSTOP",
                                                     },
                                                     {
-                                                        "label": "San Francisco",
-                                                        "value": "SF",
+                                                        "label": "Structures syntaxiques les plus fréquentes",
+                                                        "value": "STX",
+                                                    },
+                                                    {
+                                                        "label": "Étendue du vocabulaire",
+                                                        "value": "VOC",
+                                                    },
+                                                    {
+                                                        "label": "Analyse de la ponctuation",
+                                                        "value": "PONCT",
+                                                    },
+                                                    {
+                                                        "label": "Analyse de sentiments",
+                                                        "value": "SENT",
                                                     },
                                                 ],
-                                                value=["NYC", "MTL", "SF"],
+                                                value=["FREQ", "FREQSTOP", "STX", "VOC", "PONCT" "SENT"],
                                                 style={
                                                     "textAlign": "left",
-                                                },
-                                            ),
-                                            html.Label(
-                                                className="config",
-                                                children="Checkboxes2",
-                                                style={
-                                                    "width": "100%",
-                                                    "height": "60px",
-                                                    "lineHeight": "60px",
-                                                    "textAlign": "center",
-                                                    "margin": "10px"
-                                                    }
-                                                ),
-                                            dcc.Checklist(
-                                                options=[
-                                                    {
-                                                        "label": "New York City",
-                                                        "value": "NYC",
-                                                    },
-                                                    {
-                                                        "label": u"Montréal",
-                                                        "value": "MTL",
-                                                    },
-                                                    {
-                                                        "label": "San Francisco",
-                                                        "value": "SF",
-                                                    },
-                                                ],
-                                                value=["NYC", "MTL", "SF"],
-                                                style={
-                                                    "textAlign": "center",
-                                                },
-                                            ),
-                                            html.Label(
-                                                className="config",
-                                                children="Checkboxes3",
-                                                style={
-                                                    "width": "100%",
-                                                    "height": "60px",
-                                                    "lineHeight": "60px",
-                                                    "textAlign": "right",
-                                                    "margin": "15px"
-                                                    }
-                                                ),
-                                            dcc.Checklist(
-                                                options=[
-                                                    {
-                                                        "label": "New York City",
-                                                        "value": "NYC",
-                                                    },
-                                                    {
-                                                        "label": u"Montréal",
-                                                        "value": "MTL",
-                                                    },
-                                                    {
-                                                        "label": "San Francisco",
-                                                        "value": "SF",
-                                                    },
-                                                ],
-                                                value=["NYC", "MTL", "SF"],
-                                                style={
-                                                    "textAlign": "right"
                                                 },
                                             ),
                                         ],
@@ -207,15 +234,14 @@ app.layout = html.Div(
                                                 children=[
                                                     html.Div(
                                                         className="fullwidth-app-controls-name",
-                                                        children="Select preloaded dataset",
                                                     ),
                                                     dcc.Upload(
                                                         id="upload-data",
                                                         children=html.Div(
                                                             [
-                                                                "Déposez votre fichier ici ou",
+                                                                "Déposez votre fichier .txt ici ou ",
                                                                 html.A(
-                                                                    " sélectionnez-le"
+                                                                    "sélectionnez-le"
                                                                 ),
                                                             ]
                                                         ),
@@ -244,113 +270,12 @@ app.layout = html.Div(
             ]
         ),
         html.Div(id="output-data-upload"),
-        dcc.Graph(
-            figure=dict(
-                data=[
-                    dict(
-                        x=[
-                            1995,
-                            1996,
-                            1997,
-                            1998,
-                            1999,
-                            2000,
-                            2001,
-                            2002,
-                            2003,
-                            2004,
-                            2005,
-                            2006,
-                            2007,
-                            2008,
-                            2009,
-                            2010,
-                            2011,
-                            2012,
-                        ],
-                        y=[
-                            219,
-                            146,
-                            112,
-                            127,
-                            124,
-                            180,
-                            236,
-                            207,
-                            236,
-                            263,
-                            350,
-                            430,
-                            474,
-                            526,
-                            488,
-                            537,
-                            500,
-                            439,
-                        ],
-                        name="Rest of world",
-                        marker=dict(color="rgb(55, 83, 109)"),
-                    ),
-                    dict(
-                        x=[
-                            1995,
-                            1996,
-                            1997,
-                            1998,
-                            1999,
-                            2000,
-                            2001,
-                            2002,
-                            2003,
-                            2004,
-                            2005,
-                            2006,
-                            2007,
-                            2008,
-                            2009,
-                            2010,
-                            2011,
-                            2012,
-                        ],
-                        y=[
-                            16,
-                            13,
-                            10,
-                            11,
-                            28,
-                            37,
-                            43,
-                            55,
-                            56,
-                            88,
-                            105,
-                            156,
-                            270,
-                            299,
-                            340,
-                            403,
-                            549,
-                            499,
-                        ],
-                        name="China",
-                        marker=dict(color="rgb(26, 118, 255)"),
-                    ),
-                ],
-                layout=dict(
-                    title="US Export of Plastic Scrap",
-                    showlegend=True,
-                    legend=dict(x=0, y=1.0),
-                    margin=dict(l=40, r=0, t=40, b=30),
-                ),
-            ),
-            style={"height": 300},
-            id="my-graph",
-        )
-        # html.H4("phrases"+str(stats(text)))
+        html.Div(id="output-data-upload2")
     ],
-    style={'columnCount':1})
+)
 
 # DYNAMISME DE L'APPLICATION_________________________________________________
+
 
 @app.callback(
     Output("output-data-upload", "children"),
@@ -361,6 +286,19 @@ def update_output(list_of_contents, list_of_names):
     if list_of_contents is not None:
         children = [
             parse_contents(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
+
+
+@app.callback(
+    Output("output-data-upload2", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename")],
+)
+def update_df(list_of_contents, list_of_names):
+    if list_of_contents is not None:
+        children = [
+            generate_table(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
 

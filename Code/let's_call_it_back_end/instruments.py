@@ -24,7 +24,7 @@ def frequency(liste):
     r=input('show graph? ')
     if r=='yes':
         freqplot(dictionary)
-     
+
     #print("in form of a dictionary:")
 #dans une celule de liste insertons clés et valeur pour chaque clés et valeur de diccionaire (methode .items() permet acceder en même temps aux clés et valeurs)
     list_key_value = [ [k,v] for v, k in dictionary.items() ]
@@ -39,7 +39,7 @@ def frequency(liste):
             print (w, dictionary[w])
     else:
         print('bad answer')
-    
+
 #juste le methode sorted. en fait on peut comme ici n'indiquer pas reverse quand on a beaoin d;ordre decroissant parce que il est par defaut
     list_croissant= sorted(list_key_value)
     #print (list_croissant)
@@ -62,7 +62,7 @@ def verify(inp):
     else:
         NError = ValueError('no pattern')
         raise NError
-#gives the pattern 
+#gives the pattern
 def posstats(doc):
     t=[ word.pos_ for word in doc]
     liste_of_frequence= [t.count(e) for e in t]
@@ -105,7 +105,7 @@ def patterngiver(doc):
     l3=[]
     l4=[]
     if verify(inp)==inp:
-        pattern=inp.split()       
+        pattern=inp.split()
         for e in range(len(t)-1):
             if len(pattern)==1:
                 if pattern[0]in t[e]:
@@ -127,7 +127,7 @@ def patterngiver(doc):
                     l4.append([t[e][0],t[e+1][0],t[e+2][0],t[e+3][0]])
                     print (t[e],"-",t[e+1],"-",t[e+2],"-",t[e+3])
                     print(t[e][0],t[e+1][0],t[e+2][0],t[e+3][0])
-        
+
         print("quantité de matches",len(l1+l2+l3+l4))
 def phrasesnominales(dic):
     nlp = spacy.load('fr_core_news_sm')
@@ -139,7 +139,7 @@ def phrasesnominales(dic):
         l2.append([word.text for word in doc])
     for e in range (len(l1)):
         if 'VERB' not in l1[e]:
-            print(' '.join(l2[e])) 
+            print(' '.join(l2[e]))
 def longuermots(doc):
     l1=[]
     l2=[]
@@ -148,7 +148,7 @@ def longuermots(doc):
     for token in doc:
         l1.append(len(token.text))
         l2.append(token.text)
-    
+
     print('longuer maximale de mot dans corpus',max(l1))
     print(l2[l1.index(max(l1))])
     if input("je veux voir tous les mots du longuer que j'indique ")=='yes':
@@ -242,7 +242,7 @@ def freqplot(dictionary):
 def tfidfer(sentences):
     analyzer = clustering.Clustering(stopwords=False, tfidf=True, stemming=True, nbclusters=5, algo="spectral", dist="manhattan")
     dtm, vocab = analyzer.preprocess(sentences)
-    
+
     print(len(vocab))
     print(vocab)
     print ('ETAPE 2 - tf-idf')
@@ -250,7 +250,7 @@ def tfidfer(sentences):
 
     for vecteur in dtm:
         res=''
-        for chaine in vecteur:  
+        for chaine in vecteur:
             res += str(chaine)+' '
         listeTF.append(res)
     print ('count sentences :'+str(len(sentences))+' count listeTF :'+str(len(listeTF)))
