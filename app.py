@@ -7,6 +7,7 @@ import dash_table
 import pandas as pd
 from dash.dependencies import Input, Output, State
 import base64
+import stopwords
 import io
 import re
 import operator
@@ -60,11 +61,19 @@ def count_freq(liste):
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
     return sorted_dict
+    
+def count_freq_sans_mot_vides(liste):
+    dicvide=stopwords.motsvides
+    liste=[e for e in liste if e not in dicvide]
+    liste_of_frequence = [liste.count(w) for w in liste]
+    dictionary = dict(zip(liste, liste_of_frequence))
+    sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
+    return sorted_dict
 
 
 def generate_table(contents, filename):
     mots = tokenizer(contents)
-    dict_freq = count_freq(mots)
+    dict_freq = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     return html.Table(
         # Header
