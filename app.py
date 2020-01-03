@@ -73,6 +73,19 @@ def count_freq_sans_mot_vides(liste):
 
 def generate_table(contents, filename):
     mots = tokenizer(contents)
+    dict_freq = count_freq(mots)
+    df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in df_freq.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
+        ]) for i in range(min(len(df_freq), 10))]
+    )
+def generate_table_2(contents, filename):
+    mots = tokenizer(contents)
     dict_freq = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     return html.Table(
@@ -284,7 +297,8 @@ app.layout = html.Div(
             id="outputs",
             children=[
                 html.Div(id="output-apercu"),
-                html.Div(id="output-tableau-freq")
+                html.Div(id="output-tableau-freq"),
+                html.Div(id="output-tableau-freq-sansmotsvides")
                 ]
             )
 
@@ -307,6 +321,18 @@ def update_output(list_of_contents, list_of_names):
         return children
 
 
+@app.callback(
+    Output("output-tableau-freq-sansmotsvides", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename")],
+)
+def update_df(list_of_contents, list_of_names):
+    if list_of_contents is not None:
+        children = [
+            generate_table_2(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
+        
 @app.callback(
     Output("output-tableau-freq", "children"),
     [Input("upload-data", "contents")],
