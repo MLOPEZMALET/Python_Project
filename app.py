@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output, State
 import base64
 import stopwords
 import io
+import instruments
 import re
 import operator
 
@@ -68,13 +69,15 @@ def count_freq_sans_mot_vides(liste):
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
-    return sorted_dict
+    
+    return sorted_dict, instruments.wordcl(dictionary)
 
 
 def generate_table(contents, filename):
     mots = tokenizer(contents)
     dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+    
     return html.Table(
         # Header
         [html.Tr([html.Th(col) for col in df_freq.columns])] +
@@ -86,7 +89,7 @@ def generate_table(contents, filename):
     )
 def generate_table_2(contents, filename):
     mots = tokenizer(contents)
-    dict_freq = count_freq_sans_mot_vides(mots)
+    dict_freq,wordcloud = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     return html.Table(
         # Header
@@ -97,6 +100,7 @@ def generate_table_2(contents, filename):
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
         ]) for i in range(min(len(df_freq), 10))]
     )
+    #,  html.Img(wordcloud)
 
 
 # COMPOSANTES DE L'APPLICATION_________________________________________________
