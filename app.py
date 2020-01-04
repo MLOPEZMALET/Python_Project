@@ -2,7 +2,6 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.graph_objs as go
 import dash_table
 import pandas as pd
 from dash.dependencies import Input, Output, State
@@ -12,6 +11,10 @@ import io
 import instruments
 import re
 import operator
+import plotly
+import plotly.graph_objs as go
+from plotly.offline import plot
+import random
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 # df = pd.read_fwf("vero.txt", sep="\t")
@@ -48,6 +51,7 @@ def parse_contents(contents, filename):
         ]
     )
 
+
 def tokenizer(contents):
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
@@ -62,14 +66,15 @@ def count_freq(liste):
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
     return sorted_dict
-    
+
+
 def count_freq_sans_mot_vides(liste):
     dicvide=stopwords.motsvides
     liste=[e for e in liste if e not in dicvide]
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
-    
+
     return sorted_dict, instruments.wordcl(dictionary)
 
 
@@ -77,7 +82,7 @@ def generate_table(contents, filename):
     mots = tokenizer(contents)
     dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
-    
+
     return html.Table(
         # Header
         [html.Tr([html.Th(col) for col in df_freq.columns])] +
@@ -85,12 +90,23 @@ def generate_table(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
-        ]) for i in range(min(len(df_freq), 10))]
+        ]) for i in range(min(len(df_freq), 10))],
+        style={
+            "borderStyle": "double",
+            "width": "100px",
+            "margin": "auto",
+            "margin-bottom": "20px",
+            "padding": "20px"
+
+        }
     )
+
+
 def generate_table_2(contents, filename):
     mots = tokenizer(contents)
-    dict_freq,wordcloud = count_freq_sans_mot_vides(mots)
+    dict_freq, wordcloud = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+
     return html.Table(
         # Header
         [html.Tr([html.Th(col) for col in df_freq.columns])] +
@@ -98,7 +114,14 @@ def generate_table_2(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
-        ]) for i in range(min(len(df_freq), 10))]
+        ]) for i in range(min(len(df_freq), 10))],
+        style={
+            "borderStyle": "double",
+            "width": "100px",
+            "margin": "auto",
+            "margin-bottom": "20px",
+            "padding": "20px"
+        },
     )
     #,  html.Img(wordcloud)
 
@@ -216,38 +239,81 @@ app.layout = html.Div(
                                                     "margin": "10px"
                                                     }
                                                 ),
-                                            dcc.Checklist(
-                                                options=[
-                                                    {
-                                                        "label": "Mots les plus fréquents (sans mots grammaticaux)",
-                                                        "value": "FREQ",
-                                                    },
-                                                    {
-                                                        "label": "Mots les plus fréquents (parmi tous)",
-                                                        "value": "FREQSTOP",
-                                                    },
-                                                    {
-                                                        "label": "Structures syntaxiques les plus fréquentes",
-                                                        "value": "STX",
-                                                    },
-                                                    {
-                                                        "label": "Étendue du vocabulaire",
-                                                        "value": "VOC",
-                                                    },
-                                                    {
-                                                        "label": "Analyse de la ponctuation",
-                                                        "value": "PONCT",
-                                                    },
-                                                    {
-                                                        "label": "Analyse de sentiments",
-                                                        "value": "SENT",
-                                                    },
-                                                ],
-                                                value=["FREQ", "FREQSTOP", "STX", "VOC", "PONCT" "SENT"],
-                                                style={
-                                                    "textAlign": "center",
-                                                },
-                                            ),
+                                            html.Label('Mots les plus fréquents (sans mots grammaticaux)'),
+                                                dcc.RadioItems(
+                                                    id="freq",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label('Mots les plus fréquents (avec mots grammaticaux)'),
+                                                dcc.RadioItems(
+                                                    id="stop_in_freq",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Structures syntaxiques les plus fréquentes"),
+                                                dcc.RadioItems(
+                                                    id="stx",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Etendue du vocabulaire"),
+                                                dcc.RadioItems(
+                                                    id="voc",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Analyse de la ponctuation"),
+                                                dcc.RadioItems(
+                                                    id="ponct",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Analyse de sentiments"),
+                                                dcc.RadioItems(
+                                                    id="sentiment",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Contexte d'un terme donné"),
+                                                dcc.RadioItems(
+                                                    id="ctxt",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.P(" "),
+                                            html.Button(id='submit-button', n_clicks=0, children='Valider'),
+                                            html.P(" "),
+                                            html.P(id="display-selected-values"),
+                                            html.Hr(),
                                         ],
                                     ),
                                 ),
@@ -299,17 +365,28 @@ app.layout = html.Div(
         ),
         html.Div(
             id="outputs",
+            style={"columnCount": 3},
             children=[
                 html.Div(id="output-apercu"),
-                html.Div(id="output-tableau-freq"),
-                html.Div(id="output-tableau-freq-sansmotsvides")
-                ]
-            )
-
-    ],
+                html.Div(
+                    id="output-tableau-freq",
+                    style={
+                        "width": "60%"
+                        },
+                    ),
+                html.Div(
+                    id="output-tableau-freq-sansmotsvides",
+                    style={"width": "80%"}
+                )
+            ]
+        )
+    ]
 )
 
 # DYNAMISME DE L'APPLICATION_________________________________________________
+
+
+# ____________aperçu du texte
 
 
 @app.callback(
@@ -324,31 +401,92 @@ def update_output(list_of_contents, list_of_names):
         ]
         return children
 
+# ____________checkboxes
+
+@app.callback(
+    Output("display-selected-values", "children"),
+    [Input('submit-button', 'n_clicks')],
+    [State("freq", "value"),
+     State("stop_in_freq", "value"),
+     State("stx", "value"),
+     State("ctxt", "value"),
+     State("voc", "value"),
+     State("sentiment", "value"),
+     State("ponct", "value")
+     ]
+ )
+
+def update_output(n_clicks, *value):
+    if n_clicks == 0:
+        return "Veuillez enregistrer vos préférences"
+    else:
+        return "Vos préférences ont bien été enregistrées, à présent, déposez votre corpus dans l'onglet Data"
+
+# ____________tableau fréquence sans mots vides
+
 
 @app.callback(
     Output("output-tableau-freq-sansmotsvides", "children"),
     [Input("upload-data", "contents")],
-    [State("upload-data", "filename")],
+    [State("upload-data", "filename"), State("freq", "value")],
 )
-def update_df(list_of_contents, list_of_names):
-    if list_of_contents is not None:
+def update_df2(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
         children = [
             generate_table_2(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
-        
+
+# ____________tableau fréquence avec mots vides
+
+
 @app.callback(
     Output("output-tableau-freq", "children"),
     [Input("upload-data", "contents")],
-    [State("upload-data", "filename")],
+    [State("upload-data", "filename"), State("stop_in_freq", "value")],
 )
-def update_df(list_of_contents, list_of_names):
-    if list_of_contents is not None:
+def update_df(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
         children = [
             generate_table(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
 
+# ___________ TODO: wordcloud
+
+"""INTERESTING CODE FROM THE INTERNET (https://community.plot.ly/t/wordcloud-in-dash/11407/3)
+
+words = dir(go)[:30]
+colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
+weights = [random.randint(15, 35) for i in range(30)]
+
+
+
+data = go.Scatter(x=[random.random() for i in range(30)],
+                 y=[random.random() for i in range(30)],
+                 mode='text',
+                 text=words,
+                 marker={'opacity': 0.3},
+                 textfont={'size': weights,
+                           'color': colors})
+layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
+                    'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
+fig = go.Figure(data=[data], layout=layout)
+
+plot(fig)
+"""
+
+# ___________ TODO: graphique fréquence
+
+# ___________ TODO: éventuellement, si temps, fréquence d'un mot en particulier précisé par l'utilisateur
+
+# ___________ TODO: étendue du vocabulaire
+
+# ___________ TODO: analyse de ponctuation
+
+# ___________ TODO: analyse de sentiments
+
+# ___________ TODO: mot donné dans contexte
 
 if __name__ == "__main__":
     app.run_server(debug=True)
