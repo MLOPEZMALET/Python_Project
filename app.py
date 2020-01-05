@@ -15,6 +15,7 @@ import plotly
 import plotly.graph_objs as go
 from plotly.offline import plot
 import random
+from spacy.lang.fr import French
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 # df = pd.read_fwf("vero.txt", sep="\t")
@@ -30,6 +31,7 @@ colors = {
 
 # FONCTIONS SUR LE CONTENU_____________________________________________________
 
+nlp_fr = French()
 
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(",")
@@ -61,6 +63,7 @@ def tokenizer(contents):
     return liste
 
 
+
 def count_freq(liste):
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
@@ -69,8 +72,8 @@ def count_freq(liste):
 
 
 def count_freq_sans_mot_vides(liste):
-    dicvide=stopwords.motsvides
-    liste=[e for e in liste if e not in dicvide]
+    dicvide = stopwords.motsvides
+    liste = [e for e in liste if e not in dicvide]
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
@@ -123,8 +126,40 @@ def generate_table_2(contents, filename):
             "padding": "20px"
         },
     )
-    #,  html.Img(wordcloud)
 
+
+def generate_table_voc(contents, filename):
+    mots = nlp_fr(contents)
+    lemmes = [token.lemma_ for token in mots]
+    print(lemmes)
+    nb_mots = len(lemmes)
+    print(nb_mots)
+    mots_uniques = len(set(lemmes))
+    print(mots_uniques)
+    stat = {
+        "nb": ["Nombre de mots uniques dans le document: ", mots_uniques],
+        "nb2": ["Nombre de mots total du document: ", nb_mots],
+        "nb3": ["Richesse du vocabulaire: ", round(mots_uniques/nb_mots, 3)]
+         }
+    print(stat)
+    df_freq = pd.DataFrame.from_dict(stat, orient="index", columns=["Mesure", "Valeur"])
+
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in df_freq.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
+        ]) for i in range(min(len(df_freq), 10))],
+        style={
+            "borderStyle": "double",
+            "width": "100px",
+            "margin": "auto",
+            "margin-bottom": "20px",
+            "padding": "20px"
+        },
+    )
 
 # COMPOSANTES DE L'APPLICATION_________________________________________________
 
@@ -205,8 +240,28 @@ app.layout = html.Div(
                                                     "margin": "10px"
                                                 },
                                             ),
-                                            html.P("L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus. Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion."),
-                                            html.P("Comment faire? C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration puis vous déposez votre corpus (en format .txt) dans l'onglet Data."),
+                                            html.P(
+                                                """L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus.
+                                                Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion.
+                                                En effet, le numérique permet de calculer rapidement des indicateurs et des statistiques précieuses pour un travail d'analyse textuelle.""",
+                                                style={"margin-bottom": "20px"}
+                                                ),
+                                            html.P(
+                                                "Comment faire?",
+                                                style={"textAlign": "center", "margin-bottom": "2Opx"}
+                                                ),
+                                            html.P(
+                                                """C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration
+                                                puis vous déposez votre corpus (en format .txt) dans l'onglet Data.""",
+                                                style={"margin-bottom": "20px"}
+                                            ),
+                                            html.P(
+                                                "Est-ce que je peux analyser deux documents pour les comparer?",
+                                                style={"textAlign": "center", "margin-bottom": "2Opx"}
+                                            ),
+                                            html.P(
+                                            "Oui, il suffit de les déposer à la fois, surtout pas l'un après l'autre. D'ailleurs, cela vous permettra de calculer les termes les plus spécifiques, entre autres"
+                                            ),
                                             html.P("Voilà tout!"),
                                         ],
                                     ),
@@ -367,17 +422,27 @@ app.layout = html.Div(
             id="outputs",
             style={"columnCount": 3},
             children=[
-                html.Div(id="output-apercu"),
+                html.Div(id="output-apercu", style={}),
                 html.Div(
                     id="output-tableau-freq",
                     style={
-                        "width": "60%"
+                        "width": "100%"
                         },
                     ),
                 html.Div(
                     id="output-tableau-freq-sansmotsvides",
-                    style={"width": "80%"}
+                    style={"width": "100%"}
                 )
+            ]
+        ),
+        html.Div(
+            id="outputs2",
+            style={"columnCount": 3},
+            children=[
+                html.Div(
+                    id="output-tableau-voc",
+                    style={"width": "100%"}
+                ),
             ]
         )
     ]
@@ -482,11 +547,29 @@ plot(fig)
 
 # ___________ TODO: étendue du vocabulaire
 
+@app.callback(
+    Output("output-tableau-voc", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename"), State("voc", "value")],
+)
+def update_df(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
+        children = [
+            generate_table_voc(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
+
 # ___________ TODO: analyse de ponctuation
+
+
 
 # ___________ TODO: analyse de sentiments
 
+
+
 # ___________ TODO: mot donné dans contexte
+
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
