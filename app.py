@@ -79,7 +79,45 @@ def count_freq_sans_mot_vides(liste):
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
 
     return sorted_dict, instruments.wordcl(dictionary)
+def ponctuation(liste):
+    cptinterog=0
+    for e in liste:
+        if '?' in e:
+            cptinterog+=1
+#combien de phrases exclamatives?
+    cptex=0
+    for e in liste:
+        if '!' in e:
+            cptex+=1
+    #combien de phrases avec ...?
+    cptpts=0
+    for e in liste:
+        if '...' in e:
+            cptpts+=1
+    return [['!',cptex],['?',cptinterog],['...',cptpts]]
+    
+def generate_table_ponctuation(contents, filename):
+    mots = tokenizer(contents)
+    ponct= ponctuation(mots)
+    df_ponct = pd.DataFrame(dict_ponct, columns=["Signe de ponctuation", "Fréquence"])
 
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in df_ponct.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(df_ponct.iloc[i][col]) for col in df_ponct.columns
+        ]) for i in range(3)],
+        style={
+            "borderStyle": "double",
+            "width": "100px",
+            "margin": "auto",
+            "margin-bottom": "20px",
+            "padding": "20px"
+
+        }
+    )
 
 def generate_table(contents, filename):
     mots = tokenizer(contents)
@@ -558,6 +596,20 @@ def update_df(list_of_contents, list_of_names, value):
             generate_table_voc(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
+# ____________tableau fréquence de ponctuation
+
+
+#@app.callback(
+    #Output("output-tableau-freq", "children"),
+    #[Input("upload-data", "contents")],
+    #[State("upload-data", "filename"), State("stop_in_freq", "value")],
+#)
+#def update_df(list_of_contents, list_of_names, value):
+   # if list_of_contents is not None and value == "O":
+       # children = [
+           # generate_table_ponctuation(c, n) for c, n in zip(list_of_contents, list_of_names)
+       # ]
+      #  return children
 
 # ___________ TODO: analyse de ponctuation
 
