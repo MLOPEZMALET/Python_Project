@@ -33,24 +33,27 @@ colors = {
 
 nlp_fr = French()
 
-
 def parse_contents(contents, filename):
-    """decodes text files and shows an overview of their content"""
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
     # text = io.StringIO(decoded.decode('utf-8'))
     text = decoded.decode("utf-8")
     return html.Div(
         [
-            html.H6("Aperçu du texte contenu dans: " + filename, style={"textAlign": "center"}),
-            html.I(text[:350]),
-            html.Hr()
+            html.H6("Aperçu du texte contenu dans: " + filename),
+            html.I(text[:300])
+
+            # For debugging, display the raw contents provided by the web browser
+            # html.Div('Raw Content'),
+            # html.Pre(contents[0:200] + '...', style={
+            #    'whiteSpace': 'pre-wrap',
+            #    'wordBreak': 'break-all'
+            # })
         ]
     )
 
 
 def tokenizer(contents):
-    """splits text into tokens and returns them in a list"""
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
     text = decoded.decode("utf-8")
@@ -59,8 +62,8 @@ def tokenizer(contents):
     return liste
 
 
+
 def count_freq(liste):
-    """counts the occurrencies of each word and returns a sorted dictionary"""
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
@@ -68,17 +71,16 @@ def count_freq(liste):
 
 
 def count_freq_sans_mot_vides(liste):
-    """same as count_freq but doesn't take into account the stopwords"""
     dicvide = stopwords.motsvides
     liste = [e for e in liste if e not in dicvide]
     liste_of_frequence = [liste.count(w) for w in liste]
     dictionary = dict(zip(liste, liste_of_frequence))
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
-    return sorted_dict
+
+    return sorted_dict, instruments.wordcl(dictionary)
 
 
 def ponctuation(liste):
-    """counts the occurrencies of each punctuation sign"""
     cptinterog = 0
     for e in liste:
         if '?' in e:
@@ -113,12 +115,13 @@ def ponctuation(liste):
     for e in liste:
         if ',' in e:
             cvirg += 1
+
     # TODO: ajouter guillemets? tirets longs? et autres?
+
     return [['!', cptex], ['?', cptinterog], ['...', cptpts], ['.', cpt], [':', cdeuxpts], [';', cptvirg], [',', cvirg]]
 
 
 def generate_table_ponctuation(contents, filename):
-    """creates a table with the punctuation statistics"""
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
     text = decoded.decode("utf-8")
@@ -127,25 +130,26 @@ def generate_table_ponctuation(contents, filename):
     dict_ponct = ponctuation(ponct)
     df_ponct = pd.DataFrame(dict_ponct, columns=["Signe de ponctuation", "Fréquence"])
 
-    return html.Div([
-        html.Table(
-            # Header
-            [html.Tr([html.Th(col) for col in df_ponct.columns])] +
-            # Body
-            [html.Tr([html.Td(df_ponct.iloc[i][col]) for col in df_ponct.columns]) for i in range(7)],
-            style={
-                "borderStyle": "none",
-                "width": "100px",
-                "margin": "auto",
-                "margin-bottom": "20px",
-                "padding": "20px"
-                },
-            ),
-    ])
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in df_ponct.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(df_ponct.iloc[i][col]) for col in df_ponct.columns
+        ]) for i in range(7)],
+        style={
+            "borderStyle": "double",
+            "width": "100px",
+            "margin": "auto",
+            "margin-bottom": "20px",
+            "padding": "20px"
+
+        }
+    )
 
 
 def generate_table_stopinfreq(contents, filename):
-    """creates a table with term frequency values (with stopwords)"""
     mots = tokenizer(contents)
     dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
@@ -154,12 +158,13 @@ def generate_table_stopinfreq(contents, filename):
     return html.Table(
         # Header
         [html.Tr([html.Th(col) for col in df_freq.columns])] +
+
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
         ]) for i in range(min(len(df_freq), 20))],
         style={
-            "borderStyle": "none",
+            "borderStyle": "double",
             "width": "100px",
             "margin": "auto",
             "margin-bottom": "20px",
@@ -170,9 +175,8 @@ def generate_table_stopinfreq(contents, filename):
 
 
 def generate_table_freq(contents, filename):
-    """creates a table with term frequency values (no stopwords)"""
     mots = tokenizer(contents)
-    dict_freq = count_freq_sans_mot_vides(mots)
+    dict_freq, wordcloud = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     df_freq = df_freq[:20]
 
@@ -185,7 +189,7 @@ def generate_table_freq(contents, filename):
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
         ]) for i in range(min(len(df_freq), 20))],
         style={
-            "borderStyle": "none",
+            "borderStyle": "double",
             "width": "100px",
             "margin": "auto",
             "margin-bottom": "20px",
@@ -195,7 +199,6 @@ def generate_table_freq(contents, filename):
 
 
 def generate_table_voc(contents, filename):
-    """creates a table with vocabulary variety statistics"""
     mots = nlp_fr(contents)
     lemmes = [token.lemma_ for token in mots]
     nb_mots = len(lemmes)
@@ -216,57 +219,13 @@ def generate_table_voc(contents, filename):
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
         ]) for i in range(min(len(df_freq), 20))],
         style={
-            "borderStyle": "none",
-            "height": "auto",
+            "borderStyle": "double",
             "width": "100px",
             "margin": "auto",
             "margin-bottom": "20px",
             "padding": "20px"
         },
     )
-
-
-def plot_freq(contents, filename):
-    """plots the most frequent terms into a sorted bar chart"""
-    mots = tokenizer(contents)
-    dict_freq = count_freq_sans_mot_vides(mots)
-    df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
-    df_freq = df_freq[:20]
-    plot_freq = {
-        "data": [
-            {
-                "y": df_freq["Mots"],
-                "x": df_freq["Fréquence"],
-                "type": "bar",
-                "name": "frquence des mots",
-                "orientation": "h",
-                }
-        ],
-        "layout": {"height": "550", "margin": "10px"}
-    }
-    return dcc.Graph(figure=plot_freq)
-
-
-    def plot_stopinfreq(contents, filename):
-        """plots the most frequent terms into a sorted bar chart"""
-        mots = tokenizer(contents)
-        dict_freq = count_freq(mots)
-        df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
-        df_freq = df_freq[:20]
-        plot_freq = {
-            "data": [
-                {
-                    "y": df_freq["Mots"],
-                    "x": df_freq["Fréquence"],
-                    "type": "bar",
-                    "name": "frquence des mots",
-                    "orientation": "h",
-                    }
-            ],
-            "layout": {"height": "550", "margin": "10px"}
-        }
-        return dcc.Graph(figure=plot_freq)
-
 
 # COMPOSANTES DE L'APPLICATION_________________________________________________
 
@@ -276,8 +235,7 @@ app.layout = html.Div(
     className="app-body",
     style={
         'backgroundColor': colors["tabsBackground"],
-        'columnCount': 1,
-        'position': 'static'
+        'columnCount': 1
         },
     children=[
         html.H1(
@@ -291,13 +249,12 @@ app.layout = html.Div(
             children="""Une interface pour une première analyse de corpus""",
             style={
                 "textAlign": "center",
-                "color": colors["text"],
-                "margin-bottom": "15px"
+                "color": colors["text"]
                 },
             ),
         html.Div(
             style={
-                'backgroundColor': colors["tabsBackground"],
+                'backgroundColor': colors["background"],
                 'columnCount': 1,
                 "margin-bottom": "50px",
                 },
@@ -307,9 +264,10 @@ app.layout = html.Div(
                     className="control-tabs",
                     style={
                         "width": "100%",
+                        "height": "100px",
                         "lineHeight": "20px",
                         "textAlign": "center",
-                        "margin": "auto",
+                        "margin": "10px",
                         "padding": "10px"
                     },
                     children=[
@@ -318,6 +276,7 @@ app.layout = html.Div(
                             value="what-is",
                             style={
                                 "width": "100%",
+                                "height": "60px",
                                 "lineHeight": "20px",
                                 "textAlign": "center",
                                 "margin": "10px",
@@ -331,6 +290,7 @@ app.layout = html.Div(
                                         className="control-tab",
                                         style={
                                             "width": "100%",
+                                            "height": "60px",
                                             "lineHeight": "20px",
                                             "textAlign": "center",
                                             "margin": "10px",
@@ -341,6 +301,7 @@ app.layout = html.Div(
                                                 children="Qu'est-ce qu'un analyseur de texte?",
                                                 style={
                                                     "width": "100%",
+                                                    "height": "60px",
                                                     "textAlign": "center",
                                                     "margin": "10px"
                                                 },
@@ -388,7 +349,7 @@ app.layout = html.Div(
                                                     "margin": "10px",
                                                 },
                                             ),
-                                            html.B(
+                                            html.Label(
                                                 className="config",
                                                 children="Sélectionnez les informations souhaitées",
                                                 style={
@@ -396,10 +357,11 @@ app.layout = html.Div(
                                                     "height": "30px",
                                                     "lineHeight": "30px",
                                                     "textAlign": "center",
-                                                    "margin-bottom": "20px"
+                                                    "margin": "10px"
                                                     }
                                                 ),
-                                            html.Label('Voulez-vous comparer deux documents?(duplique les éléments sélectionnés + ajoute TF-IDF et mesure de spécificité)'),
+                                            html.Label('Voulez-vous comparer deux documents?'),
+                                            html.Label('(ajoute TF-IDF et mesure de spécificité, voir onglet explication)'),
                                                 dcc.RadioItems(
                                                     id="multiple",
                                                     options=[
@@ -407,7 +369,6 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label('Mots les plus fréquents (sans mots grammaticaux)'),
@@ -418,7 +379,6 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label('Mots les plus fréquents (avec mots grammaticaux)'),
@@ -429,7 +389,6 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label("Structures syntaxiques les plus fréquentes"),
@@ -440,7 +399,6 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label("Etendue du vocabulaire"),
@@ -451,7 +409,6 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label("Analyse de la ponctuation"),
@@ -462,7 +419,16 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+                                            html.Label("Analyse de sentiments"),
+                                                dcc.RadioItems(
+                                                    id="sentiment",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
                                             html.Label("Contexte d'un terme donné"),
@@ -473,12 +439,12 @@ app.layout = html.Div(
                                                         {'label': 'NON', 'value': 'N'},
                                                         ],
                                                     value='O',
-                                                    style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
+                                            html.P(" "),
                                             html.Button(id='submit-button', n_clicks=0, children='Valider'),
                                             html.P(" "),
-                                            html.B(id="display-selected-values"),
+                                            html.P(id="display-selected-values"),
                                             html.Hr(),
                                         ],
                                     ),
@@ -530,36 +496,25 @@ app.layout = html.Div(
             ]
         ),
         html.Div(
-            id="output-apercu",
-            style={"margin": "20px"}
-            ),
-        html.Div(
             id="outputs",
-            style={
-                "columnCount": 2,
-                "margin": "10px"
-            },
+            style={"columnCount": 3},
             children=[
+                html.Div(id="output-apercu", style={}),
                 html.Div(
                     id="output-tableau-freq",
                     style={
-                        "width": "auto"
+                        "width": "100%"
                         },
                     ),
-                html.Div(id="stopinfrequency_figure", style={"width": "auto"}),
                 html.Div(
                     id="output-tableau-freq-sansmotsvides",
-                    style={"width": "auto"}
-                ),
-                html.Div(id="frequency_figure", style={"width": "auto"})
+                    style={"width": "100%"}
+                )
             ]
         ),
         html.Div(
             id="outputs2",
-            style={
-                "columnCount": 3,
-                "margin": "20px"
-                },
+            style={"columnCount": 3},
             children=[
                 html.Div(
                     id="output-tableau-voc",
@@ -594,7 +549,6 @@ def update_output(list_of_contents, list_of_names):
 
 # ____________checkboxes
 
-
 @app.callback(
     Output("display-selected-values", "children"),
     [Input('submit-button', 'n_clicks')],
@@ -603,9 +557,11 @@ def update_output(list_of_contents, list_of_names):
      State("stx", "value"),
      State("ctxt", "value"),
      State("voc", "value"),
+     State("sentiment", "value"),
      State("ponct", "value")
      ]
  )
+
 def update_output(n_clicks, *value):
     if n_clicks == 0:
         return "Veuillez enregistrer vos préférences"
@@ -666,39 +622,13 @@ fig = go.Figure(data=[data], layout=layout)
 plot(fig)
 """
 
-# ___________graphique fréquence sans mots vides
+# ___________ TODO: graphique fréquence
 
-
-@app.callback(
-    Output("frequency_figure", "children"),
-    [Input("upload-data", "contents")],
-    [State("upload-data", "filename"), State("freq", "value")]
-)
-def update_plot(list_of_contents, list_of_names, value):
-    if list_of_contents is not None and value == "O":
-        children = [
-            plot_freq(c, n) for c, n in zip(list_of_contents, list_of_names)
-        ]
-        return children
-
-# ____________graphique frequence avec mots motsvides
-
-@app.callback(
-    Output("stopinfrequency_figure", "children"),
-    [Input("upload-data", "contents")],
-    [State("upload-data", "filename"), State("stop_in_freq", "value")]
-)
-def update_plot(list_of_contents, list_of_names, value):
-    if list_of_contents is not None and value == "O":
-        children = [
-            plot_freq(c, n) for c, n in zip(list_of_contents, list_of_names)
-        ]
-        return children
 
 
 # ___________ TODO: éventuellement, si temps, fréquence d'un mot en particulier précisé par l'utilisateur
 
-# ___________ TODO: étendue du vocabulaire VALEURS PAS VRAISEMBLABLES
+# ___________ TODO: étendue du vocabulaire
 
 
 @app.callback(
@@ -715,7 +645,6 @@ def update_df_voc(list_of_contents, list_of_names, value):
 
 # ____________tableau fréquence de ponctuation
 
-
 @app.callback(
     Output("output-tableau-ponct", "children"),
     [Input("upload-data", "contents")],
@@ -729,13 +658,13 @@ def update_df_ponct(list_of_contents, list_of_names, value):
         return children
 
 
+
 # ___________ TODO: mot donné dans contexte
 
-# ____________TODO: POS Tags
+# tfidf
 
-# ____________TODO: tfidf
+# spécificité
 
-# ____________TODO: spécificité
 
 
 if __name__ == "__main__":
