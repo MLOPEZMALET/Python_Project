@@ -41,9 +41,8 @@ def parse_contents(contents, filename):
     return html.Div(
         [
             html.H6("Aperçu du texte contenu dans: " + filename),
-            html.H6(text[:300])
+            html.I(text[:300])
 
-            # horizontal line
             # For debugging, display the raw contents provided by the web browser
             # html.Div('Raw Content'),
             # html.Pre(contents[0:200] + '...', style={
@@ -59,7 +58,7 @@ def tokenizer(contents):
     decoded = base64.b64decode(content_string)
     text = decoded.decode("utf-8")
     new = re.sub(r'[^\w\s]', '', text)
-    liste = new.split()
+    liste = new.lower().split()
     return liste
 
 
@@ -79,26 +78,56 @@ def count_freq_sans_mot_vides(liste):
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
 
     return sorted_dict, instruments.wordcl(dictionary)
+
+
 def ponctuation(liste):
-    cptinterog=0
+    cptinterog = 0
     for e in liste:
         if '?' in e:
-            cptinterog+=1
-#combien de phrases exclamatives?
-    cptex=0
+            cptinterog += 1
+# combien de phrases exclamatives?
+    cptex = 0
     for e in liste:
         if '!' in e:
-            cptex+=1
-    #combien de phrases avec ...?
-    cptpts=0
+            cptex += 1
+    # combien de phrases avec ...?
+    cptpts = 0
     for e in liste:
         if '...' in e:
-            cptpts+=1
-    return [['!',cptex],['?',cptinterog],['...',cptpts]]
-    
+            cptpts += 1
+    # phrases déclaratives
+    cpt = 0
+    for e in liste:
+        if '.' in e:
+            cpt += 1
+    # deux points
+    cdeuxpts = 0
+    for e in liste:
+        if ':' in e:
+            cdeuxpts += 1
+    # point virgule
+    cptvirg = 0
+    for e in liste:
+        if ';' in e:
+            cptvirg += 1
+    # virgule
+    cvirg = 0
+    for e in liste:
+        if ',' in e:
+            cvirg += 1
+
+    # TODO: ajouter guillemets? tirets longs? et autres?
+
+    return [['!', cptex], ['?', cptinterog], ['...', cptpts], ['.', cpt], [':', cdeuxpts], [';', cptvirg], [',', cvirg]]
+
+
 def generate_table_ponctuation(contents, filename):
-    mots = tokenizer(contents)
-    ponct= ponctuation(mots)
+    content_type, content_string = contents.split(",")
+    decoded = base64.b64decode(content_string)
+    text = decoded.decode("utf-8")
+    doc_fr = nlp_fr(text)
+    ponct = [str(token) for token in doc_fr if token.is_punct]
+    dict_ponct = ponctuation(ponct)
     df_ponct = pd.DataFrame(dict_ponct, columns=["Signe de ponctuation", "Fréquence"])
 
     return html.Table(
@@ -108,7 +137,7 @@ def generate_table_ponctuation(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_ponct.iloc[i][col]) for col in df_ponct.columns
-        ]) for i in range(3)],
+        ]) for i in range(7)],
         style={
             "borderStyle": "double",
             "width": "100px",
@@ -119,10 +148,12 @@ def generate_table_ponctuation(contents, filename):
         }
     )
 
-def generate_table(contents, filename):
+
+def generate_table_stopinfreq(contents, filename):
     mots = tokenizer(contents)
     dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+    df_freq = df_freq[:20]
 
     return html.Table(
         # Header
@@ -131,7 +162,7 @@ def generate_table(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
-        ]) for i in range(min(len(df_freq), 10))],
+        ]) for i in range(min(len(df_freq), 20))],
         style={
             "borderStyle": "double",
             "width": "100px",
@@ -143,10 +174,11 @@ def generate_table(contents, filename):
     )
 
 
-def generate_table_2(contents, filename):
+def generate_table_freq(contents, filename):
     mots = tokenizer(contents)
     dict_freq, wordcloud = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
+    df_freq = df_freq[:20]
 
     return html.Table(
         # Header
@@ -155,7 +187,7 @@ def generate_table_2(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
-        ]) for i in range(min(len(df_freq), 10))],
+        ]) for i in range(min(len(df_freq), 20))],
         style={
             "borderStyle": "double",
             "width": "100px",
@@ -169,17 +201,13 @@ def generate_table_2(contents, filename):
 def generate_table_voc(contents, filename):
     mots = nlp_fr(contents)
     lemmes = [token.lemma_ for token in mots]
-    print(lemmes)
     nb_mots = len(lemmes)
-    print(nb_mots)
     mots_uniques = len(set(lemmes))
-    print(mots_uniques)
     stat = {
         "nb": ["Nombre de mots uniques dans le document: ", mots_uniques],
         "nb2": ["Nombre de mots total du document: ", nb_mots],
         "nb3": ["Richesse du vocabulaire: ", round(mots_uniques/nb_mots, 3)]
          }
-    print(stat)
     df_freq = pd.DataFrame.from_dict(stat, orient="index", columns=["Mesure", "Valeur"])
 
     return html.Table(
@@ -189,7 +217,7 @@ def generate_table_voc(contents, filename):
         # Body
         [html.Tr([
             html.Td(df_freq.iloc[i][col]) for col in df_freq.columns
-        ]) for i in range(min(len(df_freq), 10))],
+        ]) for i in range(min(len(df_freq), 20))],
         style={
             "borderStyle": "double",
             "width": "100px",
@@ -332,6 +360,17 @@ app.layout = html.Div(
                                                     "margin": "10px"
                                                     }
                                                 ),
+                                            html.Label('Voulez-vous comparer deux documents?'),
+                                            html.Label('(ajoute TF-IDF et mesure de spécificité, voir onglet explication)'),
+                                                dcc.RadioItems(
+                                                    id="freq",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
                                             html.Label('Mots les plus fréquents (sans mots grammaticaux)'),
                                                 dcc.RadioItems(
                                                     id="freq",
@@ -481,6 +520,10 @@ app.layout = html.Div(
                     id="output-tableau-voc",
                     style={"width": "100%"}
                 ),
+                html.Div(
+                    id="output-tableau-ponct",
+                    style={"width": "100%"}
+                ),
             ]
         )
     ]
@@ -533,10 +576,10 @@ def update_output(n_clicks, *value):
     [Input("upload-data", "contents")],
     [State("upload-data", "filename"), State("freq", "value")],
 )
-def update_df2(list_of_contents, list_of_names, value):
+def update_df_freq(list_of_contents, list_of_names, value):
     if list_of_contents is not None and value == "O":
         children = [
-            generate_table_2(c, n) for c, n in zip(list_of_contents, list_of_names)
+            generate_table_freq(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
 
@@ -548,10 +591,10 @@ def update_df2(list_of_contents, list_of_names, value):
     [Input("upload-data", "contents")],
     [State("upload-data", "filename"), State("stop_in_freq", "value")],
 )
-def update_df(list_of_contents, list_of_names, value):
+def update_df_stopinfreq(list_of_contents, list_of_names, value):
     if list_of_contents is not None and value == "O":
         children = [
-            generate_table(c, n) for c, n in zip(list_of_contents, list_of_names)
+            generate_table_stopinfreq(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
 
@@ -581,45 +624,46 @@ plot(fig)
 
 # ___________ TODO: graphique fréquence
 
+
+
 # ___________ TODO: éventuellement, si temps, fréquence d'un mot en particulier précisé par l'utilisateur
 
 # ___________ TODO: étendue du vocabulaire
+
 
 @app.callback(
     Output("output-tableau-voc", "children"),
     [Input("upload-data", "contents")],
     [State("upload-data", "filename"), State("voc", "value")],
 )
-def update_df(list_of_contents, list_of_names, value):
+def update_df_voc(list_of_contents, list_of_names, value):
     if list_of_contents is not None and value == "O":
         children = [
             generate_table_voc(c, n) for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
+
 # ____________tableau fréquence de ponctuation
 
-
-#@app.callback(
-    #Output("output-tableau-freq", "children"),
-    #[Input("upload-data", "contents")],
-    #[State("upload-data", "filename"), State("stop_in_freq", "value")],
-#)
-#def update_df(list_of_contents, list_of_names, value):
-   # if list_of_contents is not None and value == "O":
-       # children = [
-           # generate_table_ponctuation(c, n) for c, n in zip(list_of_contents, list_of_names)
-       # ]
-      #  return children
-
-# ___________ TODO: analyse de ponctuation
-
-
-
-# ___________ TODO: analyse de sentiments
+@app.callback(
+    Output("output-tableau-ponct", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename"), State("ponct", "value")],
+)
+def update_df_ponct(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
+        children = [
+            generate_table_ponctuation(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
 
 
 
 # ___________ TODO: mot donné dans contexte
+
+# tfidf
+
+# spécificité
 
 
 
