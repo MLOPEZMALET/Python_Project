@@ -6,16 +6,20 @@ import dash_table
 import pandas as pd
 from dash.dependencies import Input, Output, State
 import base64
+import spacy
 import stopwords
 import io
 import instruments
 import re
+
 import operator
 import plotly
 import plotly.graph_objs as go
 from plotly.offline import plot
 import random
+import spacy
 from spacy.lang.fr import French
+nlp = spacy.load('fr_core_news_sm')
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 # df = pd.read_fwf("vero.txt", sep="\t")
@@ -57,8 +61,43 @@ def tokenizer(contents):
     new = re.sub(r'[^\w\s]', '', text)
     liste = new.lower().split()
     return liste
+    
+def freq_postags(doc):
+    t=[ word.pos_ for word in doc]
+    liste_of_frequence= [t.count(e) for e in t]
+    #les valeurs seront les nombres d'occurences dans le deuxieme liste(liste_of_frequence)
+    dictionary = dict(zip(t,liste_of_frequence))
+    #list_key_value = [ [k,v] for v, k in dictionary.items() ]
+    #freqplot(dictionary)
+    #for w in sorted(dictionary, key=dictionary.get, reverse=True):
+    sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
+    return sorted_dict
+    
+def generate_table_postags(contents, filename):
+    """creates a table with the punctuation statistics"""
+    content_type, content_string = contents.split(",")
+    decoded = base64.b64decode(content_string)
+    text = decoded.decode("utf-8")
+    doc = nlp(text)
+    dict_postags = freq_postags(doc)
+    df_postags = pd.DataFrame(dict_postags, columns=["Partie de discours", "Fréquence"])
 
-
+    return html.Div([
+        html.Table(
+            # Header
+            [html.Tr([html.Th(col) for col in df_postags.columns])] +
+            # Body
+            [html.Tr([html.Td(df_postags.iloc[i][col]) for col in df_postags.columns]) for i in range(min(len(df_postags), 14))],
+            style={
+                "borderStyle": "none",
+                "width": "100px",
+                "margin": "auto",
+                "margin-bottom": "20px",
+                "padding": "20px"
+                },
+            ),
+    ])
+    
 def count_freq(liste):
     """counts the occurrencies of each word and returns a sorted dictionary"""
     liste_of_frequence = [liste.count(w) for w in liste]
@@ -142,12 +181,62 @@ def generate_table_ponctuation(contents, filename):
                 },
             ),
     ])
+def long_mots(doc):
+    l1=[]
+    l2=[]
+    l3=[]
+    l4=[]
+    for token in doc:
+        l1.append(len(token.text))
+        l2.append(token.text)
+    for e in l1:
+        l3.append((l1.count(e),e))
+    for e in sorted(l3):
+        if e not in l4:
+            l4.append(e)
+    l5=dict(l4)
+    l6=[]
+    l7=[]
+    for e in l4:
+        if e[0]==1:
+            l6.append(e[0])
+            l7.append(e[1])
+        else:
+            l6.append(e[0])
+            l7.append(e[1])
+    dictionary = dict(zip(l7, l6))
+    sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1), reverse=True)
+    return sorted_dict
 
+def generate_table_long_mots(contents, filename):
+    """creates a table with the punctuation statistics"""
+    content_type, content_string = contents.split(",")
+    decoded = base64.b64decode(content_string)
+    text = decoded.decode("utf-8")
+    doc = nlp(text)
+    dict_long = long_mots(doc)
+    df_long = pd.DataFrame(dict_long, columns=["Longueur du mot", "Fréquence"])
+
+    return html.Div([
+        html.Table(
+            # Header
+            [html.Tr([html.Th(col) for col in df_long.columns])] +
+            # Body
+            [html.Tr([html.Td(df_long.iloc[i][col]) for col in df_long.columns]) for i in range(min(len(df_long), 20))],
+            style={
+                "borderStyle": "none",
+                "width": "100px",
+                "margin": "auto",
+                "margin-bottom": "20px",
+                "padding": "20px"
+                },
+            ),
+    ])
 
 def generate_table_stopinfreq(contents, filename):
     """creates a table with term frequency values (with stopwords)"""
     mots = tokenizer(contents)
-    dict_freq = count_freq(mots)
+    dict_freq = count_freq_sans_mot_vides(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     df_freq = df_freq[:20]
 
@@ -172,7 +261,7 @@ def generate_table_stopinfreq(contents, filename):
 def generate_table_freq(contents, filename):
     """creates a table with term frequency values (no stopwords)"""
     mots = tokenizer(contents)
-    dict_freq = count_freq_sans_mot_vides(mots)
+    dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     df_freq = df_freq[:20]
 
@@ -229,7 +318,7 @@ def generate_table_voc(contents, filename):
 def plot_freq(contents, filename):
     """plots the most frequent terms into a sorted bar chart"""
     mots = tokenizer(contents)
-    dict_freq = count_freq_sans_mot_vides(mots)
+    dict_freq = count_freq(mots)
     df_freq = pd.DataFrame(dict_freq, columns=["Mots", "Fréquence"])
     df_freq = df_freq[:20]
     plot_freq = {
@@ -443,6 +532,18 @@ app.layout = html.Div(
                                                     style={"margin-bottom": "10px"},
                                                     labelStyle={'display': 'inline-block'}
                                                     ),
+                                                    html.Label("Longueur des mots"),
+                                                dcc.RadioItems(
+                                                    id="long",
+                                                    options=[
+                                                        {'label': 'OUI', 'value': 'O'},
+                                                        {'label': 'NON', 'value': 'N'},
+                                                        ],
+                                                    value='O',
+                                                    style={"margin-bottom": "10px"},
+                                                    labelStyle={'display': 'inline-block'}
+                                                    ),
+
                                             html.Label("Etendue du vocabulaire"),
                                                 dcc.RadioItems(
                                                     id="voc",
@@ -567,6 +668,14 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     id="output-tableau-ponct",
+                    style={"width": "100%"}
+                ),
+                html.Div(
+                    id="output-tableau-postags",
+                    style={"width": "100%"}
+                ),
+                html.Div(
+                    id="output-tableau-longueur",
                     style={"width": "100%"}
                 ),
             ]
@@ -732,6 +841,29 @@ def update_df_ponct(list_of_contents, list_of_names, value):
 # ___________ TODO: mot donné dans contexte
 
 # ____________TODO: POS Tags
+@app.callback(
+    Output("output-tableau-postags", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename"), State("stx", "value")],
+)
+def update_df_postags(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
+        children = [
+            generate_table_postags(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
+# ____________TODO: longueur des mots
+@app.callback(
+    Output("output-tableau-longueur", "children"),
+    [Input("upload-data", "contents")],
+    [State("upload-data", "filename"), State("long", "value")],
+)
+def update_df_postags(list_of_contents, list_of_names, value):
+    if list_of_contents is not None and value == "O":
+        children = [
+            generate_table_long_mots(c, n) for c, n in zip(list_of_contents, list_of_names)
+        ]
+        return children
 
 # ____________TODO: tfidf
 
