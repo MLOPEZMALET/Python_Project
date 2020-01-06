@@ -234,7 +234,7 @@ app.layout = html.Div(
     id="alignment-body",
     className="app-body",
     style={
-        'backgroundColor': colors["background"],
+        'backgroundColor': colors["tabsBackground"],
         'columnCount': 1
         },
     children=[
@@ -363,7 +363,7 @@ app.layout = html.Div(
                                             html.Label('Voulez-vous comparer deux documents?'),
                                             html.Label('(ajoute TF-IDF et mesure de spécificité, voir onglet explication)'),
                                                 dcc.RadioItems(
-                                                    id="freq",
+                                                    id="multiple",
                                                     options=[
                                                         {'label': 'OUI', 'value': 'O'},
                                                         {'label': 'NON', 'value': 'N'},
