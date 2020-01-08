@@ -1,8 +1,11 @@
 import re
 import spacy
-import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import sys
+import tkinter
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
 import operator
 import argparse
 import collections
@@ -220,9 +223,11 @@ def wordcl(word_freq):
     # lower max_font_size
     wordcloud = WordCloud(max_font_size=40).generate(text)
     plt.figure()
-    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.imshow(wordcloud, interpolation="nearest", aspect="auto")
     plt.axis("off")
-    plt.show()
+    plt.show(block=True)
+    print('if wordcloud is not on your screen, check the folder with the program for saved verision')
+    plt.savefig("wc.png")
 
 # The pil way (if you don't have matplotlib)
 # image = wordcloud.to_image()
@@ -237,8 +242,8 @@ def freqplot(dictionary):
     names = list(mc.keys())
     values = list(mc.values())
     plt.bar(range(len(mc)),values,tick_label=names)
-    plt.savefig('bar.png')
     plt.show()
+    plt.savefig("bar.png")
 def tfidfer(sentences):
     analyzer = clustering.Clustering(stopwords=False, tfidf=True, stemming=True, nbclusters=5, algo="spectral", dist="manhattan")
     dtm, vocab = analyzer.preprocess(sentences)
@@ -271,7 +276,4 @@ def tfidfer(sentences):
     for e in dic:
         f.write(e)
         f.write('\n')
-    import pandas as pd
-    import numpy as np
-    df = pd.DataFrame(dtm, columns = vocab)
     f.close()
