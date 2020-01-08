@@ -753,6 +753,7 @@ app.layout = html.Div(
                                                         # Allow multiple files to be uploaded
                                                         multiple=True,
                                                     ),
+                                                    html.B("Le chargement des résultats peut prendre quelques secondes en fonction de la taille de votre corpus.")
                                                 ],
                                             ),
                                         ],
