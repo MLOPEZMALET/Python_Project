@@ -178,9 +178,7 @@ def longuermots(doc):
                 if e[0]==1:
                     l6.append(e[0])
                     l7.append(e[1])
-                    #print(e[0],'mot de ',e[1],'lettres')
                 else:
-                    #print(e[0],'mots de ',e[1],'lettres')
                     l6.append(e[0])
                     l7.append(e[1])
             import plotly.graph_objects as go
