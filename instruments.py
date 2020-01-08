@@ -18,22 +18,18 @@ def tokenizer(text):
 
 
 def frequency(liste):
-    # literelement: compte pour moi nombre d'occurence de chauque mot dans la liste pour chauque element de liste
+    # literelement: compte pour moi nombre d'occurence de chaque mot dans la liste pour chaque élement de liste
     liste_of_frequence = [liste.count(w) for w in liste]
     # les valeurs seront les nombres d'occurences dans le deuxieme liste(liste_of_frequence)
     dictionary = dict(zip(liste, liste_of_frequence))
-    r = input("show wordcloud? ")
+    r = input("montrer un nuage des mots? ")
     if r == "yes":
         wordcl(dictionary)
-    r = input("show graph? ")
+    r = input("montrer une graphe? ")
     if r == "yes":
         freqplot(dictionary)
-
-    # print("in form of a dictionary:")
     # dans une celule de liste insertons clés et valeur pour chaque clés et valeur de diccionaire (methode .items() permet acceder en même temps aux clés et valeurs)
     list_key_value = [[k, v] for v, k in dictionary.items()]
-    # print("in form of a list:")
-    # print(list_key_value)
     r = input("par ordre croissant?yes/no ")
     if r == "yes":
         for w in sorted(dictionary, key=dictionary.get, reverse=False):
@@ -41,16 +37,9 @@ def frequency(liste):
     elif r == "no":
         for w in sorted(dictionary, key=dictionary.get, reverse=True):
             print(w, dictionary[w])
-    else:
-        print("bad answer")
 
-    # juste le methode sorted. en fait on peut comme ici n'indiquer pas reverse quand on a beaoin d;ordre decroissant parce que il est par defaut
     list_croissant = sorted(list_key_value)
-    # print (list_croissant)
     list_descroissant = sorted(list_key_value, reverse=True)
-    # print(list_descroissant)
-
-
 # verifies if pattern is correct
 def verify(inp):
     spacyliste = [
@@ -82,7 +71,6 @@ def verify(inp):
         NError = ValueError("no pattern")
         raise NError
 
-
 # gives the pattern
 def posstats(doc):
     t = [word.pos_ for word in doc]
@@ -90,30 +78,28 @@ def posstats(doc):
     # les valeurs seront les nombres d'occurences dans le deuxieme liste(liste_of_frequence)
     dictionary = dict(zip(t, liste_of_frequence))
     list_key_value = [[k, v] for v, k in dictionary.items()]
-    # print("in form of a list:")
-    # print(list_key_value)
-    r = input("show wordcloud? ")
+    r = input("montrer un nuage des mots? ")
     if r == "yes":
         wordcl(dictionary)
-    r = input("show graph? ")
+    r = input("montrer une graphe? ")
     if r == "yes":
         freqplot(dictionary)
     for w in sorted(dictionary, key=dictionary.get, reverse=True):
         print(w, dictionary[w])
 
-
+#donne la specificité du mot
 def specificity(text):
     import math
     import sys
 
-    inp = input("which document?")
+    inp = input("Quel document?")
     sys.float_info.max
     ltotal = len(text)
     r = text.split("***")
     l = len(r)
-    print("there are", l, "documents in your corpus ")
+    print("Il y a ", l, "documents dans votre corpus ")
     lpartie = len(r[int(inp) - 1])
-    terme = input("which word? ")
+    terme = input("quel mot? ")
     if terme in text:
         freqdanspartie = r[0].count(terme)
         freqtotal = text.count(terme)
@@ -138,13 +124,13 @@ def specificity(text):
         )
         print(terme, "-", s)
     else:
-        print("no such word in the corpus")
+        print("ce mot est abscent dans votre corpus")
 
-
+#donne patron morphosyntaxique
 def patterngiver(doc):
     t = [(word.text, word.pos_) for word in doc]
     inp = input(
-        "GIVE ME A PATTERN in MAJISCULE FROM THIS LISTE ('ADJ','NOUN','VERB','ADP','ADV','AUX','CCONJ','DET','PRON','PROPN','NUM','SCONJ') from 1 to 4 POS TAGs"
+        "Veillez donner un patron en majuscule separé par espace comme - NOUN ADJ -('ADJ','NOUN','VERB','ADP','ADV','AUX','CCONJ','DET','PRON','PROPN','NUM','SCONJ') de 1 à 4 pos tags"
     )
     l1 = []
     l2 = []
@@ -183,9 +169,9 @@ def patterngiver(doc):
                     print(t[e], "-", t[e + 1], "-", t[e + 2], "-", t[e + 3])
                     print(t[e][0], t[e + 1][0], t[e + 2][0], t[e + 3][0])
 
-        print("quantité de matches", len(l1 + l2 + l3 + l4))
+        print("Quantité de matches", len(l1 + l2 + l3 + l4))
 
-
+#donne les phrases nominales
 def phrasesnominales(dic):
     nlp = spacy.load("fr_core_news_sm")
     l1 = []
@@ -198,7 +184,7 @@ def phrasesnominales(dic):
         if "VERB" not in l1[e]:
             print(" ".join(l2[e]))
 
-
+#donne longueur du mot
 def longuermots(doc):
     l1 = []
     l2 = []
@@ -208,25 +194,25 @@ def longuermots(doc):
         l1.append(len(token.text))
         l2.append(token.text)
 
-    print("longuer maximale de mot dans corpus", max(l1))
+    print("Longuer maximale de mot dans corpus", max(l1))
     print(l2[l1.index(max(l1))])
-    if input("je veux voir tous les mots du longuer que j'indique ") == "yes":
-        inp = int(input("mots de longuer: "))
+    if input("Vous voullez voir tous les mots du longuer que j'indique ") == "yes":
+        inp = int(input("mots du longuer: "))
         if inp in l1:
             for e in range(len(l1)):
                 if l1[e] == inp:
                     print(l2[e])
-    elif input("je veux voir les stats de la longeur des mots ") == "yes":
+    elif input("Vous voullez voir la statistique de la longeur des mots ") == "yes":
         for e in l1:
             l3.append((l1.count(e), e))
         for e in sorted(l3):
             if e not in l4:
                 l4.append(e)
         l5 = dict(l4)
-        r = input("show graph? ")
+        r = input("montrer une graphe? ")
         if r == "yes":
             freqplot(l5)
-        r = input("show as a table? ")
+        r = input("montrer une table? ")
         if r == "yes":
             l6 = []
             l7 = []
@@ -244,19 +230,19 @@ def longuermots(doc):
             fig = go.Figure(
                 data=[
                     go.Table(
-                        header=dict(values=["Quanité", "Longuer du mot"]),
+                        header=dict(values=["Quanité", "Longueur du mot"]),
                         cells=dict(values=[l6, l7]),
                     )
                 ]
             )
             fig.show()
 
-
+#donne contexte 
 def contexte(text, dic3):
     import plotly.graph_objects as go
 
-    w = input("context du quel mot? ")
-    fenetre = int(input("combien de mots avant et après? "))
+    w = input("Context du quel mot? ")
+    fenetre = int(input("Combien de mots avant et après? "))
     liste1 = []
     liste2 = []
     liste3 = []
@@ -282,7 +268,7 @@ def contexte(text, dic3):
     )
     fig.show()
 
-
+#donne wordcloud
 def wordcl(word_freq):
     text = " ".join([(k + " ") * v for k, v in word_freq.items()])
 
@@ -293,22 +279,17 @@ def wordcl(word_freq):
     # the matplotlib way:
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
-
     # lower max_font_size
     wordcloud = WordCloud(max_font_size=40).generate(text)
     plt.figure()
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.show()
-
-
-# The pil way (if you don't have matplotlib)
-# image = wordcloud.to_image()
-# image.show()
+#donne un plot
 def freqplot(dictionary):
     # printing most common words
     # the next line sorts the default dict on the values in decreasing  # order and prints the first "to_print".
-    to_print = int(input("How many top words do you wish to print?"))
+    to_print = int(input("Combien de mots vous voullez voir?"))
     mc = sorted(dictionary.items(), key=lambda k_v: k_v[1], reverse=True)[:to_print]
     # Draw the bart chart
     mc = dict(mc)
@@ -318,7 +299,7 @@ def freqplot(dictionary):
     plt.savefig("bar.png")
     plt.show()
 
-
+#fait tf-idf
 def tfidfer(sentences):
     analyzer = clustering.Clustering(
         stopwords=False,

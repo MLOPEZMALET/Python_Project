@@ -24,7 +24,6 @@ from __future__ import unicode_literals, print_function
 from copy import deepcopy
 import numpy as np
 import csv
-
 from sklearn.cluster import SpectralClustering, KMeans, MeanShift, DBSCAN
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer

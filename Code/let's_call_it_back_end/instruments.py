@@ -1,10 +1,10 @@
 import re
 import spacy
+from chart_studio.plotly import iplot
 from wordcloud import WordCloud
 import sys
 import tkinter
 import matplotlib
-matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import operator
 import argparse
@@ -188,6 +188,8 @@ def longuermots(doc):
                  cells=dict(values=[l6,l7]))
                      ])
             fig.show()
+            fig.write_image("longueur.png")
+            
 def contexte(text,dic3):
     import plotly.graph_objects as go
     w=input('context du quel mot? ')
@@ -206,6 +208,7 @@ def contexte(text,dic3):
     fig = go.Figure(data=[go.Table(header=dict(values=['Avant', 'mot','après']),
                  cells=dict(values=[liste1,liste3,liste2]))
                      ])
+    fig.write_image("contexte.png")
     fig.show()
 
 def wordcl(word_freq):
@@ -242,8 +245,8 @@ def freqplot(dictionary):
     names = list(mc.keys())
     values = list(mc.values())
     plt.bar(range(len(mc)),values,tick_label=names)
+    plt.savefig("freq.png")
     plt.show()
-    plt.savefig("bar.png")
 def tfidfer(sentences):
     analyzer = clustering.Clustering(stopwords=False, tfidf=True, stemming=True, nbclusters=5, algo="spectral", dist="manhattan")
     dtm, vocab = analyzer.preprocess(sentences)
