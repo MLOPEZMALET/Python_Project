@@ -2,7 +2,6 @@ import re
 import spacy
 from chart_studio.plotly import iplot
 from wordcloud import WordCloud
-import tkinter
 import matplotlib
 from matplotlib import pyplot as plt
 import operator
