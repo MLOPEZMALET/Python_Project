@@ -559,10 +559,10 @@ app.layout = html.Div(
                                             ),
                                             html.P(
                                                 """L'analyseur est une application qui vous permet d'obtenir des informations sur votre corpus.
-                                            Les résultats d'une analyse informatique peuvent ainsi lancer ou enrichir vos pistes de réflexion."""
+                                            Les résultats d'une analyse informatique peuvent ainsi éveiller ou enrichir des pistes de réflexion."""
                                             ),
                                             html.P(
-                                                """En effet, le numérique permet de calculer rapidement des indicateurs et des statistiques précieuses pour un travail d'analyse textuelle.""",
+                                                """En effet, le numérique permet de calculer rapidement des indicateurs et des statistiques précieux pour un travail d'analyse textuelle.""",
                                                 style={"margin-bottom": "20px"},
                                             ),
                                             html.B(
@@ -573,7 +573,7 @@ app.layout = html.Div(
                                                 },
                                             ),
                                             html.P(
-                                                """C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration
+                                                """C'est très simple: vous choisissez ce que vous voulez obtenir comme résultats dans l'onglet configuration, vous les validez
                                                 puis vous déposez votre corpus (en format .txt) dans l'onglet Data.""",
                                                 style={"margin-bottom": "20px"},
                                             ),
@@ -585,9 +585,36 @@ app.layout = html.Div(
                                                 },
                                             ),
                                             html.P(
-                                                "Oui, il suffit de les déposer à la fois. Vos graphiques et tableaux se génèreront en fonction du contenu de chaque document."
+                                                "Oui, il suffit de les déposer à la fois. Vos graphiques et tableaux se génèreront en fonction du contenu de chaque document, et vous pourrez les comparer entre eux.",
+                                                style={"margin-bottom": "20px"},
                                             ),
-                                            html.P("Voilà tout!"),
+                                            html.B(
+                                                "Voici une description de ce que l'analyseur peut faire pour vous:",
+                                                style={
+                                                    "textAlign": "center",
+                                                    "margin-top": "20px",
+                                                    "margin-bottom": "2Opx",
+                                                },
+                                            ),
+                                            html.P(
+                                                "Fréquence des mots: affiche un tableau avec le nombre d'occurences de chaque terme, et un graphique avec les termes les plus récurrents. Vous pouvez chercher celui qui vous intéresse dans le tableau.",
+                                                style={"textAlign": "left"},
+                                            ),
+                                            html.P(
+                                                "Sans mots vides: idem, mais sans des mots trop communs et peu significatifs comme des conjonctions, déterminants...",
+                                                style={"textAlign": "left"}),
+                                            html.P(
+                                                "Natures syntaxiques: compte les parties du discours (noms, adjectifs, verbes...). Vous pouvez chercher la valeur qui vous intéresse dans le tableau",
+                                                style={"textAlign": "left"}),
+                                            html.P(
+                                                "Longueur des mots/phrases: indique combien de mots/phrases font une longueur de x. Pour chercher une valeur, vous devez la précéder de '>', '<' ou '='",
+                                                style={"textAlign": "left"}),
+                                            html.P(
+                                                "Etendue du vocabulaire: compte le nombre de mots du texte et le nombre de mots uniques. Le score de diversité du vocabulaire est représentatif en comparant deux corpus entre eux.",
+                                                style={"textAlign": "left"}),
+                                            html.P(
+                                                "Analyse de la ponctuation: compte les occurrences des divers signes de ponctuation.",
+                                                style={"textAlign": "left"}),
                                         ],
                                     ),
                                 ),
@@ -748,7 +775,7 @@ app.layout = html.Div(
                                                         # Allow multiple files to be uploaded
                                                         multiple=True,
                                                     ),
-                                                    html.B("Le chargement des résultats peut prendre quelques secondes en fonction de la taille de votre corpus.")
+                                                    html.B("Le chargement des résultats peut prendre quelques secondes (si l'onglet affiche 'Updating...' ce n'est pas encore fini!).")
                                                 ],
                                             ),
                                         ],
@@ -853,32 +880,6 @@ def update_output(n_clicks, *value):
     else:
         return "Vos préférences ont bien été enregistrées, à présent, déposez votre corpus dans l'onglet Data"
 
-
-# ___________ TODO: wordcloud
-
-"""
-
-INTERESTING CODE FROM THE INTERNET (https://community.plot.ly/t/wordcloud-in-dash/11407/3)
-
-words = dir(go)[:30]
-colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
-weights = [random.randint(15, 35) for i in range(30)]
-
-
-
-data = go.Scatter(x=[random.random() for i in range(30)],
-                 y=[random.random() for i in range(30)],
-                 mode='text',
-                 text=words,
-                 marker={'opacity': 0.3},
-                 textfont={'size': weights,
-                           'color': colors})
-layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
-                    'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
-fig = go.Figure(data=[data], layout=layout)
-
-plot(fig)
-"""
 
 # ___________graphique fréquence sans mots vides
 
@@ -1026,9 +1027,6 @@ def update_df_ponct(list_of_contents, list_of_names, value):
             for c, n in zip(list_of_contents, list_of_names)
         ]
         return children
-
-
-# ___________ TODO: mot donné dans contexte
 
 
 if __name__ == "__main__":
