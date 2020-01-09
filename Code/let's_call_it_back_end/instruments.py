@@ -217,7 +217,7 @@ def longuermots(doc):
             for e in range(len(l1)):
                 if l1[e] == inp:
                     print(l2[e])
-    elif input("Je veux voir les statistiques sur la longueur des mots ") == "oui":
+    elif input("Voulez-vous voir les statistiques sur la longueur des mots? ") == "oui":
         for e in l1:
             l3.append((l1.count(e), e))
         for e in sorted(l3):
