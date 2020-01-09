@@ -1,10 +1,7 @@
+<<<<<<< HEAD
 PROJET LANGAGES DE SCRIPT M2 - Veronika Solopova, Mélanie Lopez Malet
 
-ANALYSEUR DE TEXTE: POUR UNE PREMIÈRE ANALYSE DE CORPUS
-
-
-OBJECTIF DU PROJET
-
+ANALYSEUR DE TEXTE: pour une première analyse de corpus
 
 
 CONTENU DU PROJET
@@ -18,10 +15,20 @@ Notre projet consiste en un système d'analyse de corpus de texte proposés par 
 
 FONCTIONNEMENT
 
-	- programme sans interface graphique: lancez le programme "script.py" en ligne de commande suivi du fichier que vous voulez traiter et suivez les instructions. Attention, après avoir obtenu des 		informations -c'est-à-dire, lorsque vous répondez "oui" à une demande du programme- celui-ci se relance automatiquement depuis le début: dites "non" jusqu'à ce que vous arrivirez à l'étape qui 		vous intéresse.
+	- programme sans interface graphique: lancez le programme "script.py" en ligne de commande suivi du fichier que vous voulez traiter et suivez les instructions
 	- programme avec interface graphique: lancez le programme "app.py" en ligne de commande et cliquez sur le lien proposé: l'application devrait s'ouvrir dans votre explorateur.
 
 
 STACK TECHNIQUE
 
-Vous trouverez tous les modules nécessaires au bon fonctionnement du projet dans le fichier "requirements.txt"
+modules nécessaires à installer avant:
+dash
+pandas
+spacy
+spacy "fr_core_news_sm"
+psutil
+matplotlib
+chart-studio
+wordcloud
+plotly
+
