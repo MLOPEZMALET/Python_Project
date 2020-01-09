@@ -8,13 +8,8 @@ from dash.dependencies import Input, Output, State
 import base64
 import spacy
 import stopwords
-import instruments
 import re
 import operator
-import plotly
-import plotly.graph_objs as go
-from plotly.offline import plot
-import spacy
 from spacy.lang.fr import French
 
 nlp = spacy.load("fr_core_news_sm")
